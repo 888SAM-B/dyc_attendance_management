@@ -8,6 +8,7 @@ import Studentlogin from './pages/Studentlogin'
 import Admin from './pages/admin'
 import Teacher from './pages/teacher'
 import Student from './pages/student'
+import Admindashboard from './pages/admindashboard'
 function App() {
   return (
    <div>
@@ -20,6 +21,7 @@ function App() {
         <Route path="/admin" element={<Admin/>}/>
         <Route path="/staff" element={<Teacher/>}/>
         <Route path="/student" element={<Student/>}/>
+        <Route path="/admindashboard" element={<Admindashboard/>}/>
       </Routes>
     </div>
   )

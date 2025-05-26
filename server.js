@@ -173,6 +173,12 @@ app.post('/addStudent', async (req, res) => {
             class: String,
             rollNumber: String
         }));
+
+        const existingStudent = await Student.findOne({ rollNumber });
+        if (existingStudent) {
+            return res.status(400).json({ error: 'Student already exists' });
+        }
+
         const newStudent = new Student({ name, class: studentClass, rollNumber });
         await newStudent.save();
         res.status(201).json({ message: 'Student added successfully' });

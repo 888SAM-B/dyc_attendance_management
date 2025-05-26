@@ -119,39 +119,58 @@ app.post('/adminLogin', async (req, res) => {
 });
 
 // Test route to check current database connection
+
 app.get('/currentDb', async (req, res) => {
     const currentDb = app.get('currentDb');
 
     if (!currentDb) {
         return res.json({
             dbName: 'No active database connection',
-            students: []
+            students: [],
+            teachers: []
         });
     }
 
     try {
-        // Avoid OverwriteModelError by checking if the model already exists
+        // Avoid OverwriteModelError by checking if models already exist
         const Student = currentDb.models.Student || currentDb.model('Student', new mongoose.Schema({
             name: String,
             class: String,
             rollNumber: String
         }));
 
-        // Fetch all students
-        const students = await Student.find({});
+        const Teacher = currentDb.models.Teacher || currentDb.model('Teacher', new mongoose.Schema({
+            name: String,
+            staffId: String,
+            subject: String
+        }));
 
+        // Fetch all students and teachers
+        const students = await Student.find({});
+        const teachers = await Teacher.find({});
+        console.log(teachers);
         res.json({
             dbName: currentDb.name,
-            students: students // send as array
+            students: students,
+            staff: teachers
         });
 
     } catch (err) {
         res.status(500).json({
-            error: 'Failed to fetch students',
+            error: 'Failed to fetch data',
             details: err.message
         });
     }
 });
+
+
+
+
+
+
+
+
+
 
 app.post('/addStudent', async (req, res) => {
     const { name, class: studentClass, rollNumber } = req.body;
@@ -221,6 +240,77 @@ app.post('/deleteStudent', async (req, res) => {
         res.status(500).json({ error: 'Failed to delete student', details: err.message });
     }
 }); 
+
+
+app.post('/addStaff', async (req, res) => {
+    const { name, staffId, subject } = req.body;
+
+    if (!name || !staffId || !subject) {
+        return res.status(400).json({ error: 'All fields are required' });
+    }
+
+    const currentDb = app.get('currentDb');
+
+    if (!currentDb) {
+        return res.status(500).json({ error: 'No active database connection' });
+    }
+
+    try {
+        const Teacher = currentDb.models.Teacher || currentDb.model('Teacher', new mongoose.Schema({
+            name: String,
+            staffId: String,
+            subject: String
+        }));
+
+        const existingTeacher = await Teacher.findOne({ staffId });
+        if (existingTeacher) {
+            return res.status(400).json({ error: 'Staff already exists' });
+        }
+
+        const newTeacher = new Teacher({ name, staffId, subject });
+        await newTeacher.save();
+        res.status(201).json({ message: 'Staff added successfully' });
+    } catch (err) {
+        console.error('Error adding staff:', err.message);
+        res.status(500).json({ error: 'Failed to add staff', details: err.message });
+    }
+});
+
+
+
+app.post('/deleteStaff', async (req, res) => {
+    const { staffId } = req.body;
+
+    if (!staffId) {
+        return res.status(400).json({ error: 'Staff ID is required' });
+    }
+
+    const currentDb = app.get('currentDb');
+
+    if (!currentDb) {
+        return res.status(500).json({ error: 'No active database connection' });
+    }
+
+    try {
+        const Teacher = currentDb.models.Teacher || currentDb.model('Teacher', new mongoose.Schema({
+            name: String,
+            staffId: String,
+            subject: String
+        }));
+
+        const result = await Teacher.deleteOne({ staffId });
+        if (result.deletedCount === 0) {
+            return res.status(404).json({ error: 'Staff not found' });
+        }
+
+        res.json({ message: 'Staff deleted successfully' });
+    } catch (err) {
+        console.error('Error deleting staff:', err.message);
+        res.status(500).json({ error: 'Failed to delete staff', details: err.message });
+    }
+});
+
+
 
 // Start server
 app.listen(5000, () => {

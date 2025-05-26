@@ -100,6 +100,7 @@ const Admin = () => {
       )}
       <div className="addcontainer" style={{display: display}}>
       <div className="add" >
+        <button className='close' onClick={() => setDisplay('none')} >X</button>
         <h2>Add Student</h2>
         <form
           onSubmit={async (e) => {
@@ -107,12 +108,12 @@ const Admin = () => {
             const name = e.target.name.value;
             const className = e.target.className.value;
             const rollNumber = e.target.rollNumber.value;
-
+            
             if (!name || !className || !rollNumber) {
               alert('Please fill in all fields');
               return;
             }
-
+            
             try {
               const response = await fetch('http://localhost:5000/addStudent', {
                 method: 'POST',
@@ -121,7 +122,7 @@ const Admin = () => {
                 },
                 body: JSON.stringify({ name, class: className, rollNumber }),
               });
-
+              
               const data = await response.json();
               if (data.error) {
                 alert(data.error);
@@ -140,7 +141,7 @@ const Admin = () => {
           <input type="text" name="name" placeholder="Name" required /> 
           <input type="text" name="className" placeholder="Class" required /> 
           <input type="text" name="rollNumber" placeholder="Roll Number" required /> 
-          <button type="submit">Add Student</button>
+          <button type="submit" className='addButton'>Add Student</button>
         </form>
       </div>
       </div>

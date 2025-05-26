@@ -23,8 +23,8 @@ const admindashboard = () => {
         <h2>Admin Dashboard</h2>
         <p>Welcome to the admin dashboard!</p>
         <p>Here you can manage the institution's data.</p>
-        <button title='Add or edit Student Details' onClick={()=>{navigate('/admin')}}>Students</button>
-        <button title='Add or edit Staff Details'>Staff</button>
+        <button title='Add or edit Student Details' onClick={()=>{navigate('/addStudents')}}>Students</button>
+        <button title='Add or edit Staff Details' onClick={()=>{navigate('/addStaff')}}>Staff</button>
     </>
   )
 }

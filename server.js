@@ -6,14 +6,14 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// Connect to the central institutions database
-const institutionsUri = `mongodb+srv://dycattendance:dycattendance@dyc-attendance.r5jyblp.mongodb.net/institutions`;
+// Central DB (institutions database)
+const centralDbUri = `mongodb+srv://dycattendance:dycattendance@dyc-attendance.r5jyblp.mongodb.net/institutions`;
 
-mongoose.connect(institutionsUri, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(centralDbUri, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => console.log('Connected to institutions database'))
-    .catch((err) => console.error('Database connection failed:', err.message));
+    .catch((err) => console.error('Central DB connection failed:', err.message));
 
-// Institution Schema and Model
+// Central Institution Schema
 const InstitutionSchema = new mongoose.Schema({
     dbName: String,
     userId: String,
@@ -21,7 +21,47 @@ const InstitutionSchema = new mongoose.Schema({
 });
 const Institution = mongoose.model('Institution', InstitutionSchema);
 
-// Route to create a new institution database
+// Store connections in memory for reuse
+const connectionCache = {};
+
+const getDbConnection = async (dbName) => {
+    if (connectionCache[dbName]) return connectionCache[dbName];
+
+    const dbUri = `mongodb+srv://dycattendance:dycattendance@dyc-attendance.r5jyblp.mongodb.net/${dbName}`;
+    const conn = await mongoose.createConnection(dbUri, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true
+    });
+
+    connectionCache[dbName] = conn;
+    return conn;
+};
+
+// Middleware to inject DB based on userId (sent in headers)
+const dbMiddleware = async (req, res, next) => {
+    const userId = req.headers['x-user-id'];
+    const password = req.headers['x-user-password'];
+
+    if (!userId || !password) {
+        return res.status(400).json({ error: 'Missing admin credentials in headers' });
+    }
+
+    const institution = await Institution.findOne({ userId, password });
+    if (!institution) {
+        return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    try {
+        const conn = await getDbConnection(institution.dbName);
+        req.db = conn;
+        req.dbName = institution.dbName;
+        next();
+    } catch (err) {
+        res.status(500).json({ error: 'DB connection failed', details: err.message });
+    }
+};
+
+// Create DB route
 app.post('/createdb', async (req, res) => {
     const { dbName, userId, password } = req.body;
 
@@ -30,14 +70,10 @@ app.post('/createdb', async (req, res) => {
     }
 
     try {
-        const existingInstitution = await Institution.findOne({ dbName });
-        if (existingInstitution) return res.status(400).json({ error: 'Database already exists' });
+        const exists = await Institution.findOne({ $or: [{ dbName }, { userId }] });
+        if (exists) return res.status(400).json({ error: 'DB or User already exists' });
 
-        const existingUser = await Institution.findOne({ userId });
-        if (existingUser) return res.status(400).json({ error: 'UserId already exists' });
-
-        const dbUri = `mongodb+srv://dycattendance:dycattendance@dyc-attendance.r5jyblp.mongodb.net/${dbName}`;
-        const connection = mongoose.createConnection(dbUri, { useNewUrlParser: true, useUnifiedTopology: true });
+        const conn = await getDbConnection(dbName);
 
         const TeacherSchema = new mongoose.Schema({
             name: String,
@@ -45,34 +81,27 @@ app.post('/createdb', async (req, res) => {
             password: String,
             subject: String
         });
-
         const StudentSchema = new mongoose.Schema({
             name: String,
             class: String,
             rollNumber: String
         });
 
-        const Teacher = connection.model('Teacher', TeacherSchema);
-        const Student = connection.model('Student', StudentSchema);
+        const Teacher = conn.model('Teacher', TeacherSchema);
+        const Student = conn.model('Student', StudentSchema);
 
-        const sampleTeacher = new Teacher({ name: 'John Doe', staffId: 'T001', subject: 'Mathematics' });
-        await sampleTeacher.save();
+        await new Teacher({ name: 'John Doe', staffId: 'T001', password: 'pass', subject: 'Math' }).save();
+        await new Student({ name: 'Jane Smith', class: '10A', rollNumber: 'S001' }).save();
 
-        const sampleStudent = new Student({ name: 'Jane Smith', class: '10A', rollNumber: 'S001' });
-        await sampleStudent.save();
+        await new Institution({ dbName, userId, password }).save();
 
-        const institution = new Institution({ dbName, userId, password });
-        await institution.save();
-
-        res.status(201).json({ message: `Database "${dbName}" created and user inserted.` });
-        connection.close();
+        res.status(201).json({ message: `Database "${dbName}" created` });
     } catch (err) {
-        console.error('Error creating database:', err.message);
-        res.status(500).json({ error: 'Failed to create database', details: err.message });
+        res.status(500).json({ error: 'Failed to create DB', details: err.message });
     }
 });
 
-// Admin login route to connect dynamically to a specific institution DB
+// Login Route
 app.post('/adminLogin', async (req, res) => {
     const { userId, password } = req.body;
 
@@ -80,271 +109,136 @@ app.post('/adminLogin', async (req, res) => {
         return res.status(400).json({ error: 'All fields are required' });
     }
 
-    try {
-        const institution = await Institution.findOne({ userId, password });
-        if (!institution) return res.status(401).json({ error: 'Invalid credentials' });
+    const institution = await Institution.findOne({ userId, password });
+    if (!institution) return res.status(401).json({ error: 'Invalid credentials' });
 
-        const dbUri = `mongodb+srv://dycattendance:dycattendance@dyc-attendance.r5jyblp.mongodb.net/${institution.dbName}`;
-        const connection = mongoose.createConnection(dbUri, { useNewUrlParser: true, useUnifiedTopology: true });
-
-        app.set('currentDb', connection);
-
-        res.status(200).json({ message: 'Login successful', dbName: institution.dbName });
-        console.log(`Connected to ${institution.dbName} database`);
-    } catch (err) {
-        console.error('Error during login:', err.message);
-        res.status(500).json({ error: 'Login failed', details: err.message });
-    }
+    res.json({
+        message: 'Login successful',
+        dbName: institution.dbName
+    });
 });
 
-// Route to get current database students and teachers
+// All routes below use DB middleware
+app.use(dbMiddleware);
+
+// Models on demand from DB
+const getModels = (conn) => {
+    const Student = conn.models.Student || conn.model('Student', new mongoose.Schema({
+        name: String,
+        class: String,
+        rollNumber: String
+    }));
+
+    const Teacher = conn.models.Teacher || conn.model('Teacher', new mongoose.Schema({
+        name: String,
+        staffId: String,
+        password: String,
+        subject: String
+    }));
+
+    const Class = conn.models.Class || conn.model('Class', new mongoose.Schema({
+        className: String
+    }));
+
+    return { Student, Teacher, Class };
+};
+
+// Get all data
 app.get('/currentDb', async (req, res) => {
-    const currentDb = app.get('currentDb');
-
-    if (!currentDb) {
-        return res.json({
-            dbName: 'No active database connection',
-            students: [],
-            teachers: []
-        });
-    }
-
     try {
-        const Student = currentDb.models.Student || currentDb.model('Student', new mongoose.Schema({
-            name: String,
-            class: String,
-            rollNumber: String
-        }));
-
-        const Teacher = currentDb.models.Teacher || currentDb.model('Teacher', new mongoose.Schema({
-            name: String,
-            staffId: String,
-            password: String,
-            subject: String
-        }));
-
+        const { Student, Teacher } = getModels(req.db);
         const students = await Student.find({});
         const teachers = await Teacher.find({});
 
         res.json({
-            dbName: currentDb.name,
+            dbName: req.dbName,
             students,
             staff: teachers
         });
     } catch (err) {
-        res.status(500).json({ error: 'Failed to fetch data', details: err.message });
+        res.status(500).json({ error: 'Fetch failed', details: err.message });
     }
 });
 
 // Add Student
 app.post('/addStudent', async (req, res) => {
     const { name, class: studentClass, rollNumber } = req.body;
-    const currentDb = app.get('currentDb');
+    const { Student } = getModels(req.db);
 
     if (!name || !studentClass || !rollNumber) {
-        return res.status(400).json({ error: 'All fields are required' });
+        return res.status(400).json({ error: 'All fields required' });
     }
 
-    if (!currentDb) {
-        return res.status(500).json({ error: 'No active database connection' });
-    }
+    const exists = await Student.findOne({ rollNumber });
+    if (exists) return res.status(400).json({ error: 'Roll number exists' });
 
-    try {
-        const Student = currentDb.models.Student || currentDb.model('Student', new mongoose.Schema({
-            name: String,
-            class: String,
-            rollNumber: String
-        }));
-
-        const existingStudent = await Student.findOne({ rollNumber });
-        if (existingStudent) return res.status(400).json({ error: 'Roll Number already exists' });
-
-        const newStudent = new Student({ name, class: studentClass, rollNumber });
-        await newStudent.save();
-
-        res.status(201).json({ message: 'Student added successfully' });
-    } catch (err) {
-        console.error('Error adding student:', err.message);
-        res.status(500).json({ error: 'Failed to add student', details: err.message });
-    }
+    await new Student({ name, class: studentClass, rollNumber }).save();
+    res.status(201).json({ message: 'Student added' });
 });
 
 // Delete Student
 app.post('/deleteStudent', async (req, res) => {
     const { studentId } = req.body;
-    const currentDb = app.get('currentDb');
+    const { Student } = getModels(req.db);
 
-    if (!studentId) {
-        return res.status(400).json({ error: 'Student ID is required' });
-    }
+    const result = await Student.deleteOne({ _id: studentId });
+    if (result.deletedCount === 0) return res.status(404).json({ error: 'Student not found' });
 
-    if (!currentDb) {
-        return res.status(500).json({ error: 'No active database connection' });
-    }
-
-    try {
-        const Student = currentDb.models.Student || currentDb.model('Student', new mongoose.Schema({
-            name: String,
-            class: String,
-            rollNumber: String
-        }));
-
-        const result = await Student.deleteOne({ _id: studentId });
-        if (result.deletedCount === 0) return res.status(404).json({ error: 'Student not found' });
-
-        res.json({ message: 'Student deleted successfully' });
-    } catch (err) {
-        console.error('Error deleting student:', err.message);
-        res.status(500).json({ error: 'Failed to delete student', details: err.message });
-    }
+    res.json({ message: 'Student deleted' });
 });
 
 // Add Staff
 app.post('/addStaff', async (req, res) => {
     const { name, staffId, password, subject } = req.body;
-    const currentDb = app.get('currentDb');
+    const { Teacher } = getModels(req.db);
 
-    if (!name || !staffId || !subject || !password) {
-        return res.status(400).json({ error: 'All fields are required' });
-    }
+    const exists = await Teacher.findOne({ staffId });
+    if (exists) return res.status(400).json({ error: 'Staff exists' });
 
-    if (!currentDb) {
-        return res.status(500).json({ error: 'No active database connection' });
-    }
-
-    try {
-        const Teacher = currentDb.models.Teacher || currentDb.model('Teacher', new mongoose.Schema({
-            name: String,
-            staffId: String,
-            password: String, // Optional, can be added later
-            subject: String
-        }));
-
-        const existingTeacher = await Teacher.findOne({ staffId });
-        if (existingTeacher) return res.status(400).json({ error: 'Staff already exists' });
-
-        const newTeacher = new Teacher({ name, staffId, password, subject });
-        await newTeacher.save();
-
-        res.status(201).json({ message: 'Staff added successfully' });
-    } catch (err) {
-        console.error('Error adding staff:', err.message);
-        res.status(500).json({ error: 'Failed to add staff', details: err.message });
-    }
+    await new Teacher({ name, staffId, password, subject }).save();
+    res.status(201).json({ message: 'Staff added' });
 });
 
 // Delete Staff
 app.post('/deleteStaff', async (req, res) => {
     const { staffId } = req.body;
-    const currentDb = app.get('currentDb');
+    const { Teacher } = getModels(req.db);
 
-    if (!staffId) {
-        return res.status(400).json({ error: 'Staff ID is required' });
-    }
+    const result = await Teacher.deleteOne({ staffId });
+    if (result.deletedCount === 0) return res.status(404).json({ error: 'Staff not found' });
 
-    if (!currentDb) {
-        return res.status(500).json({ error: 'No active database connection' });
-    }
-
-    try {
-        const Teacher = currentDb.models.Teacher || currentDb.model('Teacher', new mongoose.Schema({
-            name: String,
-            staffId: String,
-            subject: String
-        }));
-
-        const result = await Teacher.deleteOne({ staffId });
-        if (result.deletedCount === 0) return res.status(404).json({ error: 'Staff not found' });
-
-        res.json({ message: 'Staff deleted successfully' });
-    } catch (err) {
-        console.error('Error deleting staff:', err.message);
-        res.status(500).json({ error: 'Failed to delete staff', details: err.message });
-    }
+    res.json({ message: 'Staff deleted' });
 });
 
-
-
+// Add Class
 app.post('/addClass', async (req, res) => {
     const { className } = req.body;
+    const { Class } = getModels(req.db);
 
-    if (!className) {
-        return res.status(400).json({ error: 'Class name is required' });
-    }
+    const exists = await Class.findOne({ className });
+    if (exists) return res.status(400).json({ error: 'Class exists' });
 
-    const currentDb = app.get('currentDb');
-
-    if (!currentDb) {
-        return res.status(500).json({ error: 'No active database connection' });
-    }
-
-    try {
-        const Class = currentDb.models.Class || currentDb.model('Class', new mongoose.Schema({
-            className: String
-        }));
-
-        const existingClass = await Class.findOne({ className });
-        if (existingClass) {
-            return res.status(400).json({ error: 'Class already exists' });
-        }
-
-        const newClass = new Class({ className });
-        await newClass.save();
-        res.status(201).json({ message: 'Class added successfully' });
-    } catch (err) {
-        console.error('Error adding class:', err.message);
-        res.status(500).json({ error: 'Failed to add class', details: err.message });
-    }
+    await new Class({ className }).save();
+    res.status(201).json({ message: 'Class added' });
 });
 
+// Get Classes
 app.get('/classes', async (req, res) => {
-    const currentDb = app.get('currentDb');
-
-    if (!currentDb) {
-        return res.status(500).json({ error: 'No active database connection' });
-    }
-
-    try {
-        const Class = currentDb.models.Class || currentDb.model('Class', new mongoose.Schema({
-            className: String
-        }));
-
-        const classes = await Class.find({});
-        res.json(classes);
-    } catch (err) {
-        console.error('Error fetching classes:', err.message);
-        res.status(500).json({ error: 'Failed to fetch classes', details: err.message });
-    }
+    const { Class } = getModels(req.db);
+    const classes = await Class.find({});
+    res.json(classes);
 });
 
+// Delete Class
 app.delete('/deleteClass/:classId', async (req, res) => {
     const { classId } = req.params;
-    const currentDb = app.get('currentDb');
+    const { Class } = getModels(req.db);
 
-    if (!classId) {
-        return res.status(400).json({ error: 'Class ID is required' });
-    }
+    const result = await Class.deleteOne({ _id: classId });
+    if (result.deletedCount === 0) return res.status(404).json({ error: 'Class not found' });
 
-    if (!currentDb) {
-        return res.status(500).json({ error: 'No active database connection' });
-    }
-
-    try {
-        const Class = currentDb.models.Class || currentDb.model('Class', new mongoose.Schema({
-            className: String
-        }));
-
-        const result = await Class.deleteOne({ _id: classId });
-        if (result.deletedCount === 0) return res.status(404).json({ error: 'Class not found' });
-
-        res.json({ message: 'Class deleted successfully' });
-    } catch (err) {
-        console.error('Error deleting class:', err.message);
-        res.status(500).json({ error: 'Failed to delete class', details: err.message });
-    }
+    res.json({ message: 'Class deleted' });
 });
 
-// Start the server
-app.listen(5000, () => {
-    console.log('Server is running on port 5000');
-});
+// Start server
+app.listen(5000, () => console.log('Server running on port 5000'));

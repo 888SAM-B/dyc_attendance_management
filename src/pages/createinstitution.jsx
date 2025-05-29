@@ -1,5 +1,5 @@
 import React from 'react';
-
+const url=import.meta.env.VITE_URL
 const CreateInstitution = () => {
 
     const handleSubmit = (e) => {
@@ -15,7 +15,7 @@ const CreateInstitution = () => {
             return;
         }
 
-        fetch('http://localhost:5000/createdb', {
+        fetch(`${url}/createdb`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

@@ -3,14 +3,16 @@ import React, { useEffect, useState } from 'react';
 const AddStaff = () => {
   const [dbName, setDbName] = useState('');
   const [staff, setStaff] = useState([]);
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [display, setDisplay] = useState('none');
-
+const url=import.meta.env.VITE_URL
   useEffect(() => {
     const fetchDbInfo = async () => {
       try {
-        const response = await fetch('http://localhost:5000/currentDb');
+        
+        const response = await fetch(`${url}/currentDb`);
         const data = await response.json();
 
         if (data.dbName && data.dbName !== 'No active database connection') {
@@ -35,7 +37,7 @@ const AddStaff = () => {
     if (!confirmDelete) return;
 
     try {
-      const response = await fetch('http://localhost:5000/deleteStaff', {
+      const response = await fetch(`${url}/deleteStaff`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -79,6 +81,7 @@ const AddStaff = () => {
                 <tr style={{ backgroundColor: '#f2f2f2' }}>
                   <th>Name</th>
                   <th>Staff ID</th>
+                  <th>Password</th>
                   <th>Subject</th>
                   <th>Actions</th>
                 </tr>
@@ -88,6 +91,7 @@ const AddStaff = () => {
                   <tr key={s._id || index}>
                     <td>{s.name}</td>
                     <td>{s.staffId}</td>
+                    <td>{s.password}</td>
                     <td>{s.subject}</td>
                     <td className='actions' >
                       <button onClick={() => handleDelete(s.staffId)}  className="deleteButton"  >Delete</button>
@@ -110,19 +114,19 @@ const AddStaff = () => {
               const name = e.target.name.value;
               const staffId = e.target.staffId.value;
               const subject = e.target.subject.value;
-
-              if (!name || !staffId || !subject) {
+              const password = e.target.password.value;
+              if (!name || !staffId || !subject || !password) {
                 alert('Please fill in all fields');
                 return;
               }
 
               try {
-                const response = await fetch('http://localhost:5000/addStaff', {
+                const response = await fetch(`${url}/addStaff`, {
                   method: 'POST',
                   headers: {
                     'Content-Type': 'application/json',
                   },
-                  body: JSON.stringify({ name, staffId, subject }),
+                  body: JSON.stringify({ name, staffId, password, subject }),
                 });
 
                 const data = await response.json();
@@ -142,6 +146,7 @@ const AddStaff = () => {
           >
             <input type="text" name="name" placeholder="Name" required />
             <input type="text" name="staffId" placeholder="Staff ID" required />
+            <input type="text" name="password" placeholder="Password" required />
             <input type="text" name="subject" placeholder="Subject" required />
             <button type="submit" className='addButton' >Add Staff</button>
           </form>

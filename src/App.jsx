@@ -10,6 +10,7 @@ import Student from './pages/student'
 import Admindashboard from './pages/admindashboard'
 import AddStudents from './pages/AddStudents'
 import AddStaff from './pages/addStaff'
+import AddClasses from './pages/addClasses'
 function App() {
   return (
    <div>
@@ -24,6 +25,7 @@ function App() {
         <Route path="/staff" element={<Teacher/>}/>
         <Route path="/student" element={<Student/>}/>
         <Route path="/admindashboard" element={<Admindashboard/>}/>
+        <Route path="/addClasses" element={<AddClasses/>}/>
       </Routes>
     </div>
   )

@@ -1,5 +1,6 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
+const url=import.meta.env.VITE_URL
 const Teacherlogin = () => {
   const navigate = useNavigate()
   const handleSubmit = (e) => {

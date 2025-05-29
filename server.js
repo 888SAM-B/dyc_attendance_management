@@ -137,7 +137,8 @@ const getModels = (conn) => {
     }));
 
     const Class = conn.models.Class || conn.model('Class', new mongoose.Schema({
-        className: String
+        className: String,
+        Students:[{ rollNumber: String, name: String}],
     }));
 
     return { Student, Teacher, Class };
@@ -164,6 +165,7 @@ app.get('/currentDb', async (req, res) => {
 app.post('/addStudent', async (req, res) => {
     const { name, class: studentClass, rollNumber } = req.body;
     const { Student } = getModels(req.db);
+    const { Class } = getModels(req.db);
 
     if (!name || !studentClass || !rollNumber) {
         return res.status(400).json({ error: 'All fields required' });
@@ -171,7 +173,11 @@ app.post('/addStudent', async (req, res) => {
 
     const exists = await Student.findOne({ rollNumber });
     if (exists) return res.status(400).json({ error: 'Roll number exists' });
-
+    const classExists = await Class.findOne({ className: studentClass });
+    if (!classExists) return res.status(400).json({ error: 'Class does not exist' });
+    classExists.Students.push({ rollNumber, name });
+    await classExists.save();
+    
     await new Student({ name, class: studentClass, rollNumber }).save();
     res.status(201).json({ message: 'Student added' });
 });
@@ -215,8 +221,11 @@ app.post('/addClass', async (req, res) => {
     const { className } = req.body;
     const { Class } = getModels(req.db);
 
-    const exists = await Class.findOne({ className });
-    if (exists) return res.status(400).json({ error: 'Class exists' });
+    const exists = await Class.find({});
+    for (const cls of exists) {
+        
+        if ((cls.className.toLowerCase()).replace(' ','') === (className.toLowerCase()).replace(' ','') ) return res.status(400).json({ error: 'Class exists' });
+    }
 
     await new Class({ className }).save();
     res.status(201).json({ message: 'Class added' });
@@ -232,11 +241,18 @@ app.get('/classes', async (req, res) => {
 // Delete Class
 app.delete('/deleteClass/:classId', async (req, res) => {
     const { classId } = req.params;
+    const className = req.body.className;
+    console.log(className);
+    if (!classId || !className) {
+        return res.status(400).json({ error: 'Class ID and name required' });
+    }
     const { Class } = getModels(req.db);
+    const { Student } = getModels(req.db);
 
     const result = await Class.deleteOne({ _id: classId });
     if (result.deletedCount === 0) return res.status(404).json({ error: 'Class not found' });
 
+    await Student.deleteMany({ class: className });
     res.json({ message: 'Class deleted' });
 });
 

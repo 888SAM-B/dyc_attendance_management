@@ -43,7 +43,14 @@ const Adminlogin = () => {
             alert('Login failed');
         });
     };
-
+    const togglePasswordVisibility = () => {
+        const passwordField = document.getElementById('password');
+        if (passwordField.type === 'password') {
+            passwordField.type = 'text';
+        } else {
+            passwordField.type = 'password';
+        }
+    }
     return (
         <div className='container'>
             <h1>Admin Login</h1>
@@ -55,6 +62,7 @@ const Adminlogin = () => {
                 <div className="mb-3">
                     <label htmlFor="password" className="form-label">Password</label>
                     <input type="password" name="password" className="form-control" id="password" />
+                    <input type="checkbox" onClick={togglePasswordVisibility} /> 
                 </div>
                 <button type="submit" className="btn btn-primary">Login</button>
             </form>

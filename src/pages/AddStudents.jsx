@@ -1,8 +1,10 @@
+
 import React, { useEffect, useState } from 'react';
 const url=import.meta.env.VITE_URL
 const AddStudents = () => {
   const [dbName, setDbName] = useState('');
   const [students, setStudents] = useState([]);
+  const [allStudents, setAllStudents] = useState([]); 
   const [loading, setLoading] = useState(true); // for initial loader
   const [error, setError] = useState('');
   const [display, setDisplay] = useState('none');
@@ -22,6 +24,7 @@ const AddStudents = () => {
         if (data.dbName && data.dbName !== 'No active database connection') {
           setDbName(data.dbName);
           setStudents(data.students || []);
+          setAllStudents(data.students || []); // Store all students for filtering
           setLoading(false);
         } else {
           // Retry after short delay if DB is not yet connected
@@ -54,6 +57,7 @@ const AddStudents = () => {
         console.log('Fetched classes:', data); // Debugging line
         if (Array.isArray(data)) {
           setClasses(data);
+          
         } else {
           console.error('Unexpected data format:', data);
         }
@@ -88,12 +92,26 @@ const AddStudents = () => {
       } else {
         alert(data.message);
         setStudents(students.filter((student) => student._id !== studentId));
+        setAllStudents(allStudents.filter((student) => student._id !== studentId)); // Update allStudents as well
       }
     } catch (err) {
       console.error('Error:', err);
       alert('Failed to delete student');
     }
   };
+  
+
+const sortByClass = (e) => {
+  const selectedClass = e.target.value;
+
+  if (selectedClass === 'all') {
+    setStudents(allStudents);
+  } else {
+    const filtered = allStudents.filter(student => student.class === selectedClass);
+    setStudents(filtered);
+  }
+};
+
   return (
     <>
       <h1>
@@ -107,6 +125,12 @@ const AddStudents = () => {
       {!loading && !error && (
         <div>
           <h2>Students List:</h2>
+          <select name="class" id="" onChange={sortByClass} >
+            <option value="all"  selected>All Classes</option>
+            {classes.map((classItem, index) => (
+              <option key={index} value={classItem.className}>{classItem.className}</option>
+            ))}
+          </select>
           {students.length === 0 ? (
             <p>No students found.</p>
           ) : (
@@ -168,6 +192,7 @@ const AddStudents = () => {
               } else {
                 alert(data.message);
                 setStudents([...students, { name, class: className, rollNumber }]);
+                setAllStudents([...allStudents, { name, class: className, rollNumber }]); // Update allStudents as well
                 e.target.reset();
                 setDisplay('none');
               }

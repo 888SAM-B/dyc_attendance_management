@@ -11,8 +11,13 @@ const url=import.meta.env.VITE_URL
   useEffect(() => {
     const fetchDbInfo = async () => {
       try {
-        
-        const response = await fetch(`${url}/currentDb`);
+        const response = await fetch(`${url}/currentDb`, {
+          headers: {
+            'Content-Type': 'application/json',
+            'x-user-id': sessionStorage.getItem('adminUserId'),
+            'x-user-password': sessionStorage.getItem('adminPassword'),
+          },
+        });
         const data = await response.json();
 
         if (data.dbName && data.dbName !== 'No active database connection') {
@@ -41,7 +46,9 @@ const url=import.meta.env.VITE_URL
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-        },
+          'x-user-id': sessionStorage.getItem('adminUserId'),
+          'x-user-password': sessionStorage.getItem('adminPassword'),
+        },  
         body: JSON.stringify({ staffId }),
       });
 
@@ -125,6 +132,8 @@ const url=import.meta.env.VITE_URL
                   method: 'POST',
                   headers: {
                     'Content-Type': 'application/json',
+                    'x-user-id': sessionStorage.getItem('adminUserId'),
+                    'x-user-password': sessionStorage.getItem('adminPassword'),
                   },
                   body: JSON.stringify({ name, staffId, password, subject }),
                 });

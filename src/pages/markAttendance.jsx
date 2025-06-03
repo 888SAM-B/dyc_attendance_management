@@ -6,77 +6,75 @@ const MarkAttendance = () => {
     const [students, setStudents] = useState([]);
     const [className, setClassName] = useState("");
     const [attendance, setAttendance] = useState([]);
+    const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().split("T")[0]);
 
     const location = useLocation();
 
     useEffect(() => {
-        const fetchDbInfo = async () => {
-            const studentsList = location.state?.students || [];
-            const currentClass = location.state?.className || "";
+        const studentsList = location.state?.students || [];
+        const className = location.state?.className || "";
+        setStudents(studentsList);
+        setClassName(className);
+    }, [location]);
 
-            setStudents(studentsList);
-            setClassName(currentClass);
+    useEffect(() => {
+        if (!className) return;
 
+        const fetchAttendance = async () => {
             try {
-                const response = await axios.get(`${import.meta.env.VITE_URL}/getAttendance/${currentClass}`, {
+                const response = await axios.get(`${import.meta.env.VITE_URL}/getAttendance/${className}/${selectedDate}`, {
                     headers: {
                         'x-user-id': sessionStorage.getItem('adminUserId'),
                         'x-user-password': sessionStorage.getItem('adminPassword'),
                     }
                 });
 
-                if (response.data.length > 0) {
-                    // Get latest attendance record (already sorted by date descending)
-                    const latestRecord = response.data[0].records;
-
-                    const studentAttendance = studentsList.map(student => {
-                        const record = latestRecord.find(r => r.studentId === student._id);
-                        return record ? record.attendance : Array(2).fill(false); // default 2 hours
+                if (response.data) {
+                    const studentAttendance = students.map(student => {
+                        const record = response.data.find(r => r.studentId === student._id);
+                        return record ? record.attendance : Array(2).fill(false);
                     });
-
                     setAttendance(studentAttendance);
                 } else {
-                    // No existing attendance, initialize all with false
-                    const emptyAttendance = studentsList.map(() => Array(2).fill(false));
+                    const emptyAttendance = students.map(() => Array(2).fill(false));
                     setAttendance(emptyAttendance);
                 }
             } catch (error) {
                 console.error('Error fetching attendance:', error);
-                // Fallback to empty attendance if error occurs
-                const emptyAttendance = studentsList.map(() => Array(2).fill(false));
-                setAttendance(emptyAttendance);
+                setAttendance(students.map(() => Array(2).fill(false)));
             }
         };
 
-        fetchDbInfo();
-    }, []);
+        fetchAttendance();
+    }, [className, students, selectedDate]);
 
     const handleCheckboxChange = (studentIndex, hourIndex) => {
-        const updatedAttendance = [...attendance];
-        updatedAttendance[studentIndex][hourIndex] = !updatedAttendance[studentIndex][hourIndex];
-        setAttendance(updatedAttendance);
+        const updated = [...attendance];
+        updated[studentIndex][hourIndex] = !updated[studentIndex][hourIndex];
+        setAttendance(updated);
     };
 
     const handleSubmit = async () => {
+        const userId = sessionStorage.getItem('adminUserId');
+        const password = sessionStorage.getItem('adminPassword');
+
+        if (!userId || !password) {
+            alert('Please login again.');
+            return;
+        }
+
+        const attendanceData = students.map((student, index) => ({
+            studentId: student._id,
+            name: student.name,
+            rollNumber: student.rollNumber,
+            attendance: attendance[index],
+        }));
+
         try {
-            const userId = sessionStorage.getItem('adminUserId');
-            const password = sessionStorage.getItem('adminPassword');
-
-            if (!userId || !password) {
-                alert('Admin credentials missing. Please log in again.');
-                return;
-            }
-
-            const attendanceData = students.map((student, index) => ({
-                studentId: student._id,
-                name: student.name,
-                rollNumber: student.rollNumber,
-                attendance: attendance[index],
-            }));
-
             const response = await axios.post(`${import.meta.env.VITE_URL}/submitAttendance`, {
                 className,
                 attendanceRecords: attendanceData,
+                date: selectedDate
             }, {
                 headers: {
                     'x-user-id': userId,
@@ -85,9 +83,8 @@ const MarkAttendance = () => {
             });
 
             alert('Attendance submitted successfully!');
-            console.log(response.data);
         } catch (error) {
-            console.error('Error submitting attendance:', error.response?.data || error.message);
+            console.error('Error submitting attendance:', error);
             alert('Failed to submit attendance.');
         }
     };
@@ -95,50 +92,56 @@ const MarkAttendance = () => {
     return (
         <>
             <h1>{className} Attendance</h1>
-            <div>
-                <h2>Students List:</h2>
-                {students.length === 0 ? (
-                    <p>No students found.</p>
-                ) : (
-                    <>
-                        <table border={1} cellPadding={5} cellSpacing={0}>
-                            <thead>
-                                <tr style={{ backgroundColor: '#f2f2f2' }}>
-                                    <th rowSpan={2}>Name</th>
-                                    <th rowSpan={2}>Roll No</th>
-                                    <th colSpan={2}>Hours</th>
-                                </tr>
-                                <tr style={{ backgroundColor: '#f2f2f2' }}>
-                                    <th>FORENOON</th>
-                                    <th>AFTERNOON</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {students.map((student, studentIndex) => (
-                                    <tr key={student._id || studentIndex}>
-                                        <td>{student.name}</td>
-                                        <td>{student.rollNumber}</td>
-                                        {attendance[studentIndex]?.map((checked, hourIndex) => (
-                                            <td key={hourIndex}>
-                                                <input
-                                                    className='attendanceCheckbox'
-                                                    type="checkbox"
-                                                    checked={checked}
-                                                    onChange={() => handleCheckboxChange(studentIndex, hourIndex)}
-                                                />
-                                            </td>
-                                        ))}
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
 
-                        <button onClick={handleSubmit} style={{ marginTop: '20px' }}>
-                            Submit Attendance
-                        </button>
-                    </>
-                )}
+            <div style={{ margin: "10px 0" }}>
+                <label>Select Date: </label>
+                <input
+                    type="date"
+                    value={selectedDate}
+                    onChange={(e) => setSelectedDate(e.target.value)}
+                />
             </div>
+
+            {students.length === 0 ? (
+                <p>No students found.</p>
+            ) : (
+                <>
+                    <table border={1} cellPadding={5} cellSpacing={0}>
+                        <thead>
+                            <tr style={{ backgroundColor: '#f2f2f2' }}>
+                                <th rowSpan={2}>Name</th>
+                                <th rowSpan={2}>Roll No</th>
+                                <th colSpan={2}>Hours</th>
+                            </tr>
+                            <tr style={{ backgroundColor: '#f2f2f2' }}>
+                                <th>FORENOON</th>
+                                <th>AFTERNOON</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {students.map((student, sIdx) => (
+                                <tr key={student._id || sIdx}>
+                                    <td>{student.name}</td>
+                                    <td>{student.rollNumber}</td>
+                                    {attendance[sIdx]?.map((checked, hIdx) => (
+                                        <td key={hIdx}>
+                                            <input
+                                                type="checkbox"
+                                                checked={checked}
+                                                onChange={() => handleCheckboxChange(sIdx, hIdx)}
+                                            />
+                                        </td>
+                                    ))}
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+
+                    <button onClick={handleSubmit} style={{ marginTop: '20px' }}>
+                        Submit Attendance
+                    </button>
+                </>
+            )}
         </>
     );
 };

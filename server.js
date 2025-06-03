@@ -211,37 +211,38 @@ app.delete('/deleteClass/:classId', async (req, res) => {
 });
 
 
-app.get('/getAttendance/:className', async (req, res) => {
-    const { className } = req.params;
+app.get('/getAttendance/:className/:date', async (req, res) => {
+    const { className, date } = req.params;
 
-    if (!className) {
-        return res.status(400).json({ error: 'Class name is required' });
+    if (!className || !date) {
+        return res.status(400).json({ error: 'Class name and date are required' });
     }
 
     try {
         const { Attendance } = getModels(req.db);
 
-        const attendanceRecords = await Attendance
-            .find({ className })
-            .sort({ date: -1 })
-            .limit(1); // ✅ Fetch only the latest record
+        const start = new Date(date);
+        start.setHours(0, 0, 0, 0);
 
-        if (attendanceRecords.length === 0) {
-            return res.status(200).json([]); // ✅ Return empty array instead of 404
-        }
+        const end = new Date(date);
+        end.setHours(23, 59, 59, 999);
 
-        return res.status(200).json(attendanceRecords);
-    } catch (error) {
-        console.error('Error fetching attendance:', error);
-        return res.status(500).json({
-            error: 'Failed to fetch attendance records',
-            details: error.message
+        const record = await Attendance.findOne({
+            className,
+            date: { $gte: start, $lte: end }
         });
+
+        if (!record) return res.status(200).json(null); // No record for date
+
+        res.status(200).json(record.records);
+    } catch (error) {
+        console.error('Error fetching attendance by date:', error);
+        res.status(500).json({ error: 'Failed to fetch attendance', details: error.message });
     }
 });
 
 app.post('/submitAttendance', async (req, res) => {
-    const { className, attendanceRecords } = req.body;
+    const { className, attendanceRecords, date } = req.body;
 
     if (!className || !Array.isArray(attendanceRecords)) {
         return res.status(400).json({
@@ -252,31 +253,33 @@ app.post('/submitAttendance', async (req, res) => {
     try {
         const { Attendance } = getModels(req.db);
 
-        const today = new Date();
-        today.setHours(0, 0, 0, 0); // Set to start of today
+        // Parse and normalize date
+        const selectedDate = new Date(date || new Date());
+        selectedDate.setHours(0, 0, 0, 0); // Normalize to midnight
 
+        // Check if there's already attendance for that class on that date
         let existingRecord = await Attendance.findOne({
             className,
-            date: { $gte: today }
+            date: selectedDate
         });
 
         if (existingRecord) {
             existingRecord.records = attendanceRecords;
-            existingRecord.date = new Date(); // Update to current time
             await existingRecord.save();
 
-            return res.status(200).json({ message: 'Attendance updated successfully' });
+            return res.status(200).json({ message: 'Attendance updated successfully for selected date' });
         }
 
+        // Else create a new one
         const newAttendance = new Attendance({
             className,
             records: attendanceRecords,
-            date: new Date()
+            date: selectedDate
         });
 
         await newAttendance.save();
 
-        return res.status(201).json({ message: 'Attendance submitted successfully' });
+        return res.status(201).json({ message: 'Attendance submitted successfully for selected date' });
     } catch (error) {
         console.error('Error submitting attendance:', error);
         return res.status(500).json({
@@ -285,6 +288,5 @@ app.post('/submitAttendance', async (req, res) => {
         });
     }
 });
-
 
 app.listen(5000, () => console.log('Server running on port 5000'));

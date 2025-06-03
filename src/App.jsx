@@ -11,6 +11,7 @@ import Admindashboard from './pages/admindashboard'
 import AddStudents from './pages/AddStudents'
 import AddStaff from './pages/addStaff'
 import AddClasses from './pages/addClasses'
+import MarkAttendance from './pages/markAttendance'
 function App() {
   return (
    <div>
@@ -26,6 +27,7 @@ function App() {
         <Route path="/student" element={<Student/>}/>
         <Route path="/admindashboard" element={<Admindashboard/>}/>
         <Route path="/addClasses" element={<AddClasses/>}/>
+        <Route path="/markAttendance" element={<MarkAttendance/>}/>
       </Routes>
     </div>
   )

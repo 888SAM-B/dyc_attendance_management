@@ -112,3 +112,17 @@ table{
  gap: 20px;
  flex-wrap: wrap;
 }
+.checkBoxContainer
+{
+    text-align: center;
+}
+checkbox{
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+    text-align: center;
+}
+.attendanceCheckbox{
+    border:1px solid red;
+    text-align: center;
+}

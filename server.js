@@ -289,4 +289,67 @@ app.post('/submitAttendance', async (req, res) => {
     }
 });
 
+// Optional: You can modularize this into middleware if needed
+app.post('/finishAttendance', async (req, res) => {
+    const { className, date } = req.body;
+
+    // 🔐 Check for missing body parameters
+    if (!className || !date) {
+        return res.status(400).json({ error: 'Class name and date are required' });
+    }
+
+    // 🔐 Check admin credentials in headers
+    const userId = req.headers['x-user-id'];
+    const password = req.headers['x-user-password'];
+
+    if (!userId || !password) {
+        return res.status(401).json({ error: 'Missing admin credentials in headers' });
+    }
+
+    try {
+        const { Attendance } = getModels(req.db); // Ensure getModels loads the correct schema
+
+        // 🕓 Normalize the date range to cover full day (avoid time mismatch)
+        const startOfDay = new Date(date);
+        startOfDay.setHours(0, 0, 0, 0);
+
+        const endOfDay = new Date(date);
+        endOfDay.setHours(23, 59, 59, 999);
+
+        // 🔍 Find record with same class and date range
+        const record = await Attendance.findOne({
+            className,
+            date: {
+                $gte: startOfDay,
+                $lte: endOfDay
+            }
+        });
+
+        if (!record) {
+            return res.status(404).json({
+                error: 'No attendance record found for this class on the specified date'
+            });
+        }
+
+        // ✅ Optional: Mark attendance as finalized (needs 'finalized' field in schema)
+        record.finalized = true;
+        await record.save();
+
+        console.log('Attendance finalized:', record);
+
+        return res.status(200).json({
+            message: 'Attendance finalized successfully',
+            finalized: true
+        });
+
+    } catch (error) {
+        console.error('Error finishing attendance:', error);
+        return res.status(500).json({
+            error: 'Failed to finish attendance',
+            details: error.message
+        });
+    }
+});
+
+
 app.listen(5000, () => console.log('Server running on port 5000'));

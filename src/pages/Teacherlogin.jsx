@@ -48,7 +48,7 @@ const TeacherLogin = () => {
         sessionStorage.setItem('adminUserId', data.adminUserId);
         sessionStorage.setItem('adminPassword', data.adminPassword);
         alert('Login successful');
-        navigate('/staff', { replace: true });
+        navigate('/staffDashboard', { replace: true });
       } else {
         alert('Invalid username or password');
       }

@@ -1,5 +1,5 @@
 import { useLocation } from 'react-router-dom';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import axios from 'axios';
 
 const MarkAttendance = () => {
@@ -88,9 +88,34 @@ const MarkAttendance = () => {
             alert('Failed to submit attendance.');
         }
     };
+    const handleFinish = async () => {
+        const userId = sessionStorage.getItem('adminUserId');
+        const password = sessionStorage.getItem('adminPassword');
 
+        if (!userId || !password) {
+            alert('Please login again.');
+            return;
+        }
+
+        try {
+            const response = await axios.post(`${import.meta.env.VITE_URL}/finishAttendance`, {
+                className,
+                date: selectedDate
+            }, {
+                headers: {
+                    'x-user-id': userId,
+                    'x-user-password': password,
+                }
+            });
+
+            alert('Attendance for today has been finished successfully!');
+        } catch (error) {
+            console.error('Error finishing attendance:', error);
+            alert('Failed to finish attendance.');
+        }
+    }
     return (
-        <>
+        <>            
             <h1>{className} Attendance</h1>
 
             <div style={{ margin: "10px 0" }}>
@@ -139,6 +164,9 @@ const MarkAttendance = () => {
 
                     <button onClick={handleSubmit} style={{ marginTop: '20px' }}>
                         Submit Attendance
+                    </button>
+                    <button onClick={handleFinish} >
+                        Finish Attendance for today
                     </button>
                 </>
             )}

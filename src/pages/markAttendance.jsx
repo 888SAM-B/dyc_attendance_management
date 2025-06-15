@@ -133,12 +133,12 @@ const MarkAttendance = () => {
                 <>
                     <table border={1} cellPadding={5} cellSpacing={0}>
                         <thead>
-                            <tr style={{ backgroundColor: '#f2f2f2' }}>
+                            <tr >
                                 <th rowSpan={2}>Name</th>
                                 <th rowSpan={2}>Roll No</th>
                                 <th colSpan={2}>Hours</th>
                             </tr>
-                            <tr style={{ backgroundColor: '#f2f2f2' }}>
+                            <tr >
                                 <th>FORENOON</th>
                                 <th>AFTERNOON</th>
                             </tr>

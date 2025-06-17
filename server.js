@@ -108,7 +108,7 @@ const dbMiddleware = async (req, res, next) => {
 app.use(dbMiddleware);
 
 const getModels = (conn) => {
-    const Student = conn.models.Student || conn.model('Student', new mongoose.Schema({ name: String, class: String, rollNumber: String }));
+    const Student = conn.models.Student || conn.model('Student', new mongoose.Schema({ name: String, class: String, rollNumber: String,present:Array, halfDay: Array, absent: Array }));
     const Teacher = conn.models.Teacher || conn.model('Teacher', new mongoose.Schema({ name: String, staffId: String, password: String, subject: String }));
     const Class = conn.models.Class || conn.model('Class', new mongoose.Schema({ className: String, Students: [{ rollNumber: String, name: String }] }));
     const Attendance = conn.models.Attendance || conn.model('Attendance', new mongoose.Schema({
@@ -121,7 +121,10 @@ const getModels = (conn) => {
                 rollNumber: String,
                 attendance: [Boolean]
             }
-        ]
+        ],
+        present: [{ type: String }],
+        halfDay: [{ type: String }],
+        absent:  [{ type: String }],
     }));
     return { Student, Teacher, Class, Attendance };
 };
@@ -290,10 +293,12 @@ app.post('/submitAttendance', async (req, res) => {
 });
 
 // Optional: You can modularize this into middleware if needed
+
+
 app.post('/finishAttendance', async (req, res) => {
     const { className, date } = req.body;
 
-    // 🔐 Check for missing body parameters
+    // 🔐 Validate inputs
     if (!className || !date) {
         return res.status(400).json({ error: 'Class name and date are required' });
     }
@@ -307,39 +312,70 @@ app.post('/finishAttendance', async (req, res) => {
     }
 
     try {
-        const { Attendance } = getModels(req.db); // Ensure getModels loads the correct schema
-
-        // 🕓 Normalize the date range to cover full day (avoid time mismatch)
+        const { Attendance } = getModels(req.db);
+        const { Student } = getModels(req.db);
+        // 🕓 Normalize date
         const startOfDay = new Date(date);
         startOfDay.setHours(0, 0, 0, 0);
-
         const endOfDay = new Date(date);
         endOfDay.setHours(23, 59, 59, 999);
 
-        // 🔍 Find record with same class and date range
+        // 🔍 Find attendance record
         const record = await Attendance.findOne({
             className,
-            date: {
-                $gte: startOfDay,
-                $lte: endOfDay
-            }
+            date: { $gte: startOfDay, $lte: endOfDay }
         });
 
         if (!record) {
-            return res.status(404).json({
-                error: 'No attendance record found for this class on the specified date'
-            });
+            return res.status(404).json({ error: 'No attendance record found for this class on the specified date' });
         }
 
-        // ✅ Optional: Mark attendance as finalized (needs 'finalized' field in schema)
-        record.finalized = true;
-        await record.save();
+        // ✅ Classify students
+        const present = [];
+        const halfDay = [];
+        const absent = [];
 
-        console.log('Attendance finalized:', record);
+        for (const student of record.records) {
+            const totalPeriods = student.attendance.length;
+            const presentCount = student.attendance.filter(val => val).length;
+            const studentDoc = await Student.findOne({ rollNumber: student.rollNumber });
+            console.log(`Processing student: ${studentDoc.name} (${student.rollNumber})`);
+            studentDoc.present = studentDoc.present.filter(dates => dates !== date);
+            studentDoc.halfDay = studentDoc.halfDay.filter(dates => dates !== date);
+            studentDoc.absent = studentDoc.absent.filter(dates => dates !== date);
+            studentDoc.save().catch(err => console.error(`Failed to update student ${student.rollNumber}:`, err));
+            if (presentCount === 0) {
+                absent.push(student.rollNumber);
+                studentDoc.absent.push(date);
+            } else if (presentCount === 2) {
+                present.push(student.rollNumber);
+                studentDoc.present.push(date);
+            } else {
+                halfDay.push(student.rollNumber);
+                studentDoc.halfDay.push(date);
+            }
+            studentDoc.save().catch(err => console.error(`Failed to update student ${student.rollNumber}:`, err));
+        }
+        
+        // 📝 Update the record
+        record.present = present;
+        record.halfDay = halfDay;
+        record.absent = absent;
+        record.finalized = true;
+
+        await record.save();
 
         return res.status(200).json({
             message: 'Attendance finalized successfully',
-            finalized: true
+            finalized: true,
+            summary: {
+                presentCount: present.length,
+                halfDayCount: halfDay.length,
+                absentCount: absent.length,
+                present,
+                halfDay,
+                absent    
+            }
         });
 
     } catch (error) {
@@ -350,6 +386,9 @@ app.post('/finishAttendance', async (req, res) => {
         });
     }
 });
+
+
+
 
 
 app.listen(5000, () => console.log('Server running on port 5000'));

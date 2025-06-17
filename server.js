@@ -343,7 +343,7 @@ app.post('/finishAttendance', async (req, res) => {
             studentDoc.present = studentDoc.present.filter(dates => dates !== date);
             studentDoc.halfDay = studentDoc.halfDay.filter(dates => dates !== date);
             studentDoc.absent = studentDoc.absent.filter(dates => dates !== date);
-            studentDoc.save().catch(err => console.error(`Failed to update student ${student.rollNumber}:`, err));
+            studentDoc.save
             if (presentCount === 0) {
                 absent.push(student.rollNumber);
                 studentDoc.absent.push(date);

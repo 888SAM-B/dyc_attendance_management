@@ -108,7 +108,7 @@ const dbMiddleware = async (req, res, next) => {
 app.use(dbMiddleware);
 
 const getModels = (conn) => {
-    const Student = conn.models.Student || conn.model('Student', new mongoose.Schema({ name: String, class: String, rollNumber: String,present:Array, halfDay: Array, absent: Array }));
+    const Student = conn.models.Student || conn.model('Student', new mongoose.Schema({ name: String, class: String, rollNumber: String, present: Array, halfDay: Array, absent: Array }));
     const Teacher = conn.models.Teacher || conn.model('Teacher', new mongoose.Schema({ name: String, staffId: String, password: String, subject: String }));
     const Class = conn.models.Class || conn.model('Class', new mongoose.Schema({ className: String, Students: [{ rollNumber: String, name: String }] }));
     const Attendance = conn.models.Attendance || conn.model('Attendance', new mongoose.Schema({
@@ -124,7 +124,7 @@ const getModels = (conn) => {
         ],
         present: [{ type: String }],
         halfDay: [{ type: String }],
-        absent:  [{ type: String }],
+        absent: [{ type: String }],
     }));
     return { Student, Teacher, Class, Attendance };
 };
@@ -356,7 +356,7 @@ app.post('/finishAttendance', async (req, res) => {
             }
             studentDoc.save().catch(err => console.error(`Failed to update student ${student.rollNumber}:`, err));
         }
-        
+
         // 📝 Update the record
         record.present = present;
         record.halfDay = halfDay;
@@ -374,7 +374,7 @@ app.post('/finishAttendance', async (req, res) => {
                 absentCount: absent.length,
                 present,
                 halfDay,
-                absent    
+                absent
             }
         });
 
@@ -388,6 +388,35 @@ app.post('/finishAttendance', async (req, res) => {
 });
 
 
+app.get('/attendanceReport/:className', async (req, res) => {
+  const { className } = req.params;
+  const { Student } = getModels(req.db);
+  const userId = req.headers['x-user-id'];
+  const password = req.headers['x-user-password'];
+
+  // ✅ Validate credentials
+ if (!userId || !password) {
+        return res.status(401).json({ error: 'Missing admin credentials in headers' });
+    }        
+
+  if (!className) {
+    return res.status(400).json({ error: 'Class name is required' });
+  }
+
+  try {
+    // ✅ Query students by class
+    const students = await Student.find({ class: className }); // or className if your field is named that
+
+    if (!students.length) {
+      return res.status(404).json({ error: 'No attendance records found for this class' });
+    }
+
+    res.json(students);
+  } catch (error) {
+    console.error('Error fetching attendance report:', error);
+    res.status(500).json({ error: 'Failed to fetch attendance report', details: error.message });
+  }
+});
 
 
 

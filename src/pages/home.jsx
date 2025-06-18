@@ -1,5 +1,5 @@
 import React from 'react';
-import './Home.css';
+
 
 const url = import.meta.env.VITE_URL;
 

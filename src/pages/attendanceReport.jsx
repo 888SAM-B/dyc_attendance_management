@@ -10,8 +10,8 @@ const AttendanceReport = () => {
   useEffect(() => {
     const receivedClassName = location.state?.className;
     setClassName(receivedClassName || "Unknown Class");
-     const userId = sessionStorage.getItem('adminUserId');
-      const password = sessionStorage.getItem('adminPassword');
+    const userId = sessionStorage.getItem('adminUserId');
+    const password = sessionStorage.getItem('adminPassword');
     const fetchAttendanceData = async () => {
       try {
         const response = await fetch(`${import.meta.env.VITE_URL}/attendanceReport/${receivedClassName}`, {
@@ -87,29 +87,81 @@ const AttendanceReport = () => {
                 }
 
                 return (
-                  <td key={dateStr}>
-                    <input
-                      type="checkbox"
-                      checked={status === 'present' || status === 'halfDay' || status === 'absent'}
-                      readOnly
-                      style={{
-                        accentColor: status === 'present'
-                          ? 'green'
-                          : status === 'halfDay'
-                          ? 'orange'
-                          : 'red'
-                      }}
-                    />
+                  <td key={dateStr} style={{ textAlign: 'center', padding: '7px' }}>
+                    {status === 'present' && (
+                      <div title="Present" style={{
+                        height: '16px',
+                        width: '16px',
+                         
+                        backgroundColor: 'green',
+                        display: 'inline-block'
+                      }}></div>
+                    )}
+                    {status === 'halfDay' && (
+                      <div title="Half Day" style={{
+                        height: '16px',
+                        width: '16px',
+                         
+                        backgroundColor: 'orange',
+                        display: 'inline-block'
+                      }}></div>
+                    )}
+                    {status === 'absent' && (
+                      <div title="Absent" style={{
+                        height: '16px',
+                        width: '16px',
+                         
+                        backgroundColor: 'red',
+                        display: 'inline-block'
+                      }}></div>
+                    )}
+                    {!status && (
+                      <div title="No Data" style={{
+                        height: '16px',
+                        width: '16px',
+                         
+                        backgroundColor: '#ccc',
+                        display: 'inline-block'
+                      }}></div>
+                    )}
                   </td>
+
+
                 );
               })}
               <td>
-                {student.present?.length || 0} Present,{" "}
-                {student.halfDay?.length || 0} Half Day,{" "}
-                {student.absent?.length || 0} Absent
+                P : {student.present?.length || 0} ,{" "}
+                H : {student.halfDay?.length || 0} ,{" "}
+                A : {student.absent?.length || 0}
               </td>
             </tr>
+            
+            
+
           ))}
+          <tr>
+  <td><strong>Date Summary</strong></td>
+  {datesOfMonth.map(date => {
+    const dateStr = date.toISOString().slice(0, 10);
+    let presentCount = 0, halfDayCount = 0, absentCount = 0;
+
+    attendanceData.forEach(student => {
+      if (student.present?.includes(dateStr)) presentCount++;
+      else if (student.halfDay?.includes(dateStr)) halfDayCount++;
+      else if (student.absent?.includes(dateStr)) absentCount++;
+    });
+
+    return (
+      <td key={dateStr} style={{ fontSize: '12px', textAlign: 'center' }}>
+        <div title="Present" >P: {presentCount}</div>
+        <div title="Half Day" >H: {halfDayCount}</div>
+        <div title="Absent" >A: {absentCount}</div>
+      </td>
+    );
+  })}
+  <td></td> {/* Empty cell under "Status Summary" */}
+</tr>
+
         </tbody>
       </table>
     </div>

@@ -7,7 +7,7 @@ import Teacherlogin from './pages/Teacherlogin'
 import Studentlogin from './pages/Studentlogin'
 import ListOfClasses1 from './pages/listOfClasses1'
 import ListOfClasses2 from './pages/listOfClasses2'
-import Student from './pages/student'
+import StudentDashboard from './pages/studentDashboard'
 import Admindashboard from './pages/admindashboard'
 import AddStudents from './pages/AddStudents'
 import AddStaff from './pages/addStaff'
@@ -28,7 +28,7 @@ function App() {
         <Route path="/addStaff" element={<AddStaff/>}/>
         <Route path="/class-List" element={<ListOfClasses1/>}/>
         <Route path="/class_List" element={<ListOfClasses2/>}/>
-        <Route path="/student" element={<Student/>}/>
+        <Route path="/studentDashboard" element={<StudentDashboard/>}/>
         <Route path="/admindashboard" element={<Admindashboard/>}/>
         <Route path="/addClasses" element={<AddClasses/>}/>
         <Route path="/markAttendance" element={<MarkAttendance/>}/>

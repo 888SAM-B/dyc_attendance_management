@@ -80,6 +80,17 @@ app.post('/adminLogin', async (req, res) => {
     res.json({ message: 'Login successful', dbName: institution.dbName });
 });
 
+app.post('/studentLogin', async (req, res) => {
+    const { institution, rollNumber } = req.body;
+    if (!institution || !rollNumber) return res.status(400).json({ error: 'All fields are required' });
+    const conn = await getDbConnection(institution);
+    const Student = conn.models.Student || conn.model('Student', new mongoose.Schema({ name: String, class: String, rollNumber: String }));
+    const student = await Student.findOne({ rollNumber });
+    if (!student) return res.status(404).json({ error: 'Student not found' });
+    console.log(student);
+    res.json({ message: 'Login successful', studentData: student });
+});
+
 app.get('/institutions', async (req, res) => {
     try {
         const institutions = await Institution.find({});

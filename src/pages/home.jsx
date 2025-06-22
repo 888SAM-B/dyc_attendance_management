@@ -7,13 +7,20 @@ const Home = () => {
   return (
     <>
       <div className="home-container">
-        <h1 className="home-title">Welcome to the Attendance Management System</h1>
-        <h2 className="home-url">{url}</h2>
 
+        <div className='top1' >
+          <div className='both'>
+        <h1 className="home-title">Welcome to the <span className="highlight-yellow">Attendance Management System</span></h1>
+        <br />
         <p className="home-description">
           This system simplifies attendance tracking for institutions, staff, and students. Whether you're managing a school, college, or workplace, our platform is designed to automate and streamline the attendance process.
         </p>
+        </div>
 
+        <img className='img1' src="public/4895150-removebg-preview.png" alt="" />
+        </div>
+        
+        <div className="home-button-group1">
         <div className="home-button-group">
           <button className="home-button" onClick={() => window.location.href = '/createinstitution'}>
             New Institution Registration
@@ -27,6 +34,7 @@ const Home = () => {
           <button className="home-button" onClick={() => window.location.href = '/studentlogin'}>
             Student Login
           </button>
+        </div>
         </div>
 
         <section className="home-features">

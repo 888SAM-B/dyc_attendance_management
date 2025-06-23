@@ -18,7 +18,7 @@ const Home = () => {
         </p>
         </div>
 
-        <img className='img1' src="public/4895150-removebg-preview.png" alt="" />
+        <img className='img1' src="4895150-removebg-preview.png" alt="" />
         </div>
         
         <div className="home-button-group1">

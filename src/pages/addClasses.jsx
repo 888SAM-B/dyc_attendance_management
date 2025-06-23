@@ -1,11 +1,30 @@
 import React, { useEffect, useRef, useState } from 'react';
+import './AddClasses.css';
 
 const url = import.meta.env.VITE_URL;
+
+  
 
 const AddClasses = () => {
   const [display, setDisplay] = useState('none');
   const [classes, setClasses] = useState([]);
   const inputRef = useRef(null);
+
+
+
+   useEffect(() => {
+    document.body.style.background = 'linear-gradient(to right, #083f66, #0e204d)';
+    document.body.style.margin = '0';
+    document.body.style.padding = '0';
+    document.body.style.fontFamily = '"Roboto Condensed", sans-serif';
+
+    return () => {
+      document.body.style.background = '';
+      document.body.style.margin = '';
+      document.body.style.padding = '';
+      document.body.style.fontFamily = '';
+    };
+  }, []);
 
   const fetchClasses = async () => {
     try {
@@ -88,38 +107,52 @@ const AddClasses = () => {
 
   return (
     <>
-      <h1>Add Classes</h1>
-      <button onClick={() => setDisplay('flex')}>Add Class</button>
+  <h1 className="class-page-title">Add Classes</h1>
 
-      <div className="classesList">
-        {classes.map((cls, idx) => (
-          <div className="Classes" key={cls._id || idx}>
-            <h2>{cls.className}</h2>
-            <button onClick={() => handleDeleteClass(cls._id, cls.className)}>X</button>
-          </div>
-        ))}
-      </div>
+  <button className="add-class-button" onClick={() => setDisplay('flex')}>
+    Add Class
+  </button>
 
-      <div className="mainContainer">
-        <div className="addcontainer" style={{ display }}>
-          <div className="add">
-            <button className="close" onClick={() => setDisplay('none')}>X</button>
-            <h2>Add Class</h2>
-            <form onSubmit={handleSubmit}>
-              <input
-                type="text"
-                name="name"
-                id="className"
-                placeholder="Class Name"
-                required
-                ref={inputRef}
-              />
-              <button type="submit" className="addButton">Add Class</button>
-            </form>
-          </div>
-        </div>
+  <div className="class-list-container">
+    {classes.map((cls, idx) => (
+      <div className="class-card" key={cls._id || idx}>
+        <h2 className="class-name">{cls.className}</h2>
+        <button
+          className="delete-class-button"
+          onClick={() => handleDeleteClass(cls._id, cls.className)}
+        >
+          X
+        </button>
       </div>
-    </>
+    ))}
+  </div>
+
+  <div className="add-class-modal-overlay">
+    <div className="add-class-modal" style={{ display }}>
+      <div className="add-class-form-container">
+        <button className="close-add-class-button" onClick={() => setDisplay('none')}>
+          X
+        </button>
+        <h2 className="add-class-title">Add Class</h2>
+        <form onSubmit={handleSubmit} className="add-class-form">
+          <input
+            type="text"
+            name="name"
+            id="className"
+            placeholder="Class Name"
+            required
+            ref={inputRef}
+            className="class-name-input"
+          />
+          <button type="submit" className="submit-add-class-button">
+            Add Class
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</>
+
   );
 };
 

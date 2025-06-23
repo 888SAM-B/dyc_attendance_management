@@ -72,8 +72,40 @@ h1 {
   transform: translateY(-3px);
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25);
 }
-/* Extra small devices (max width: 480px) */
+
 @media (max-width: 480px) {
+  .container {
+    width: 72%;
+    padding: 20px 15px;
+    margin: 30px auto;
+    border-radius: 12px;
+  }
+
+  h1 {
+    font-size: 1.3rem;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+  .form-label {
+    font-size: 1rem;
+  }
+
+  .form-control {
+    width: 90%;
+    font-size: 0.95rem;
+    padding: 10px;
+    margin-bottom: 15px;
+  }
+
+  .btn-primary {
+    width: 60%;
+    font-size: 1.1rem;
+    padding: 12px;
+    margin: 20px auto 0 auto;
+  }
+}
+@media (max-width: 580px) {
   .container {
     width: 72%;
     padding: 20px 15px;

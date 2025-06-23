@@ -1,7 +1,10 @@
- body{
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap');
+
+body{
     
     background: linear-gradient(135deg, #083f66 0%, #080f20 100%);
-     overflow-x: hidden;   
+     overflow-x: hidden; 
+     
 }
  
  .top1{
@@ -303,7 +306,7 @@
     font-size: 1rem;
     padding: 1.5rem 1rem;
     line-height: 1.4;
-     margin-right: 25px;
+    margin-right: 25px;
   }
 
   .home-footer a {

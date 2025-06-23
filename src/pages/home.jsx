@@ -7,6 +7,7 @@ const url = import.meta.env.VITE_URL;
 const Home = () => {
   return (
     <>
+    
       <div className="home-container">
 
         <div className='top1' >
@@ -67,6 +68,7 @@ const Home = () => {
           <p>&copy; {new Date().getFullYear()} Attendance Management System. All rights reserved.</p>
         </footer>
       </div>
+      
     </>
   );
 };

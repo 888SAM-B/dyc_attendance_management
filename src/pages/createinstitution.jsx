@@ -10,7 +10,7 @@ const CreateInstitution = () => {
     document.body.style.margin = '0';
     document.body.style.padding = '0';
     document.body.style.fontFamily = '"Roboto Condensed", sans-serif';
-    document.body.style.color = '#fff';
+    
 
     
     return () => {

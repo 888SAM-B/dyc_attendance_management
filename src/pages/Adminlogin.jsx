@@ -1,10 +1,24 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-
+import './Adminlogin.css';
 const url = import.meta.env.VITE_URL;
 
 const Adminlogin = () => {
     const navigate = useNavigate();
+
+    useEffect(() => {
+        document.body.style.background = 'linear-gradient(to right, #083f66, #0e204d)';
+        document.body.style.margin = '0';
+        document.body.style.padding = '0';
+        document.body.style.fontFamily = '"Roboto Condensed", sans-serif';
+
+        return () => {
+            document.body.style.background = '';
+            document.body.style.margin = '';
+            document.body.style.padding = '';
+            document.body.style.fontFamily = '';
+        };
+    }, []);
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -29,12 +43,8 @@ const Adminlogin = () => {
                 alert(data.error);
             } else {
                 alert(data.message);
-
-                // ✅ Store credentials in sessionStorage
                 sessionStorage.setItem('adminUserId', userId);
                 sessionStorage.setItem('adminPassword', password);
-
-                // ✅ Navigate to dashboard
                 navigate('/admindashboard', { replace: true });
             }
         })
@@ -43,14 +53,12 @@ const Adminlogin = () => {
             alert('Login failed');
         });
     };
+
     const togglePasswordVisibility = () => {
         const passwordField = document.getElementById('password');
-        if (passwordField.type === 'password') {
-            passwordField.type = 'text';
-        } else {
-            passwordField.type = 'password';
-        }
-    }
+        passwordField.type = passwordField.type === 'password' ? 'text' : 'password';
+    };
+
     return (
         <div className='container'>
             <h1>Admin Login</h1>
@@ -62,7 +70,10 @@ const Adminlogin = () => {
                 <div className="mb-3">
                     <label htmlFor="password" className="form-label">Password</label>
                     <input type="password" name="password" className="form-control" id="password" />
-                    <input type="checkbox" onClick={togglePasswordVisibility} /> 
+                    <div className="form-check mt-2">
+                        <input type="checkbox" className="form-check-input" id="showPassword" onClick={togglePasswordVisibility} />
+                        <label className="form-check-label" htmlFor="showPassword">Show Password</label>
+                    </div>
                 </div>
                 <button type="submit" className="btn btn-primary">Login</button>
             </form>

@@ -220,22 +220,19 @@ body{
 @media (max-width: 480px) {
   .home-sections {
     flex-direction: column;
-    padding: 2rem;
-    gap: 1.5rem;
+    padding: 1.4rem;
+    gap: 1.7rem;
+    
     
   }
-
-  .home-features,
-  .home-how-it-works {
-    flex: 1 1 100%;
-    padding: 1.5rem;
-    min-width: auto;
-    margin-left: 20px;
-  }
-
+.home-how-it-works{
+  margin-left: 4px;
+}
+ 
   .home-features h3,
   .home-how-it-works h3 {
     font-size: 1.5rem;
+   
   }
 
   .home-features li,
@@ -293,7 +290,7 @@ body{
   }
   .home-button {
  width: 70%;
- margin-left: 20px;
+display: block;
 }
 }
 

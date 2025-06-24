@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import './AddStudents.css';
+import './addStaff.css';
 const AddStaff = () => {
   const [dbName, setDbName] = useState('');
   const [staff, setStaff] = useState([]);

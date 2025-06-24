@@ -81,7 +81,7 @@ const url=import.meta.env.VITE_URL
 
   return (
     <>
-  <h1 className="db-connection-status">
+  <h1 className="db-connection-status1">
     {error
       ? error
       : loading

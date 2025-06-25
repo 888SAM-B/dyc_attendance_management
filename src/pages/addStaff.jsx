@@ -91,7 +91,7 @@ const url=import.meta.env.VITE_URL
   </h1>
 
   <button className="add-student-button" onClick={() => setDisplay('flex')}>
-    Add Staff
+    Add tyfhjntedStaff
   </button>
 
   {!loading && !error && (

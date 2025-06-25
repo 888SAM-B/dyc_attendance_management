@@ -7,7 +7,9 @@ const AddStaff = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [display, setDisplay] = useState('none');
-  useEffect(() => {
+ 
+const url=import.meta.env.VITE_URL
+ useEffect(() => {
   document.body.style.background = 'linear-gradient(to right, #083f66, #0e204d)';
   document.body.style.margin = '0';
   document.body.style.padding = '0';
@@ -20,8 +22,6 @@ const AddStaff = () => {
     document.body.style.fontFamily = '';
   };
 }, []);
-const url=import.meta.env.VITE_URL
-
  
   useEffect(() => {
     const fetchDbInfo = async () => {

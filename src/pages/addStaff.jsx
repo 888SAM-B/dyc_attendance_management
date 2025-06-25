@@ -81,7 +81,7 @@ const url=import.meta.env.VITE_URL
   };
 
   return (
-    <>
+  <>
   <h1 className="db-connection-status1">
     {error
       ? error
@@ -90,19 +90,19 @@ const url=import.meta.env.VITE_URL
       : `Connected to: ${dbName}`}
   </h1>
 
-  <button className="add-student-button" onClick={() => setDisplay('flex')}>
+  <button className="add-student-button1" onClick={() => setDisplay('flex')}>
     Add Staff
   </button>
 
   {!loading && !error && (
-    <div className="student-section">
-      <h2 className="student-list-heading">Staff List:</h2>
+    <div className="student-section1">
+      <h2 className="student-list-heading1">Staff List:</h2>
       {staff.length === 0 ? (
-        <p className="no-students-message">No staff found.</p>
+        <p className="no-students-message1">No staff found.</p>
       ) : (
-        <table className="student-table" border={1} cellPadding={5} cellSpacing={0}>
+        <table className="student-table1" border={1} cellPadding={5} cellSpacing={0}>
           <thead>
-            <tr className="student-table-header">
+            <tr className="student-table-header1">
               <th>Name</th>
               <th>Staff ID</th>
               <th>Password</th>
@@ -112,15 +112,15 @@ const url=import.meta.env.VITE_URL
           </thead>
           <tbody>
             {staff.map((s, index) => (
-              <tr key={s._id || index} className="student-row">
+              <tr key={s._id || index} className="student-row1">
                 <td>{s.name}</td>
                 <td>{s.staffId}</td>
                 <td>{s.password}</td>
                 <td>{s.subject}</td>
-                <td className="action-cell">
+                <td className="action-cell1">
                   <button
                     onClick={() => handleDelete(s.staffId)}
-                    className="delete-student-button"
+                    className="delete-student-button1"
                   >
                     Delete
                   </button>
@@ -133,14 +133,14 @@ const url=import.meta.env.VITE_URL
     </div>
   )}
 
-  <div className="add-student-container" style={{ display: display }}>
-    <div className="add-student-box">
-      <button className="close-add-student-button" onClick={() => setDisplay('none')}>
+  <div className="add-student-container1" style={{ display: display }}>
+    <div className="add-student-box1">
+      <button className="close-add-student-button1" onClick={() => setDisplay('none')}>
         BACK
       </button>
-      <h2 className="add-student-title">Add Staff</h2>
+      <h2 className="add-student-title1">Add Staff</h2>
       <form
-        className="add-student-form"
+        className="add-student-form1"
         onSubmit={async (e) => {
           e.preventDefault();
           const name = e.target.name.value;
@@ -178,17 +178,18 @@ const url=import.meta.env.VITE_URL
           }
         }}
       >
-        <input type="text" name="name" placeholder="Name" required className="student-input" />
-        <input type="text" name="staffId" placeholder="Staff ID" required className="student-input" />
-        <input type="text" name="password" placeholder="Password" required className="student-input" />
-        <input type="text" name="subject" placeholder="Subject" required className="student-input" />
-        <button type="submit" className="submit-add-student-button">
+        <input type="text" name="name" placeholder="Name" required className="student-input1" />
+        <input type="text" name="staffId" placeholder="Staff ID" required className="student-input1" />
+        <input type="text" name="password" placeholder="Password" required className="student-input1" />
+        <input type="text" name="subject" placeholder="Subject" required className="student-input1" />
+        <button type="submit" className="submit-add-student-button1">
           Add Staff
         </button>
       </form>
     </div>
   </div>
 </>
+
 
   );
 };

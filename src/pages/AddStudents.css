@@ -219,3 +219,20 @@
     padding: 8px;
   }
 }
+
+
+@media screen and (max-width: 480px) {
+ 
+  .student-section {
+    padding: 20px;
+    margin: 10px;
+  }
+}
+
+@media screen and (max-width: 980px) {
+ 
+  .student-section {
+    padding: 20px;
+    margin: 10px;
+  }
+}

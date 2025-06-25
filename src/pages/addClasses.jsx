@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import './AddClasses.css';
+import './addClasses.css';
 
 const url = import.meta.env.VITE_URL;
 

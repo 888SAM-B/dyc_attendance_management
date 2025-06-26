@@ -203,249 +203,90 @@
 }
 
 
-@media (max-width: 600px) {
-  .add-student-box1 {
-    padding: 20px;
-  }
-
-  .student-table1 th,
-  .student-table1 td {
-    padding: 8px;
-  }
-}
-
-@media screen and (max-width: 480px) {
+@media (max-width: 768px) {
   .db-connection-status1 {
-    font-size: 1.4rem;
-    padding: 10px;
+    font-size: 1.5rem;
+    margin: 15px 0;
   }
 
   .add-student-button1 {
+    padding: 0.8rem 1.2rem;
     font-size: 1rem;
-    padding: 0.8rem 1rem;
-    width: 90%;
   }
 
   .student-section1 {
+    max-width: 90%;
     padding: 20px;
-    margin: 10px;
   }
 
   .student-list-heading1 {
     font-size: 1.4rem;
+    margin-bottom: 10px;
   }
 
   .class-filter-select1 {
-    font-size: 1rem;
+    font-size: 1.4rem;
     padding: 8px;
-    width: 100%;
+  }
+
+  .no-students-message1 {
+    font-size: 1rem;
   }
 
   .student-table1 th,
   .student-table1 td {
-    padding: 13.7px;
-    font-size: 0.8rem;
+    padding: 10px;
+    font-size: 0.9rem;
   }
 
   .action-cell1 .delete-student-button1 {
-    padding: 6px 10px;
+    padding: 6px 12px;
     font-size: 0.8rem;
   }
 
   .add-student-box1 {
     padding: 20px;
-    width: 95%;
+    max-width: 80%;
+  }
+
+  .add-student-title1 {
+    font-size: 1.3rem;
+    margin-bottom: 15px;
+  }
+
+  .student-input1,
+  .student-select1 {
+    padding: 12px;
+    font-size: 1rem;
+  }
+
+  .submit-add-student-button1 {
+    padding: 8px 14px;
+    font-size: 1rem;
   }
 
   .close-add-student-button1 {
     top: 20px;
-    right: 20px;
+    right: 30px;
     width: 50px;
-    height: 28px;
+    height: 25px;
     font-size: 14px;
   }
-
-  .add-student-title1 {
-    font-size: 1.2rem;
-  }
-
-  .student-input1,
-  .student-select1 {
-    padding: 10px;
-    font-size: 1rem;
-  }
-
-  .submit-add-student-button1 {
-    padding: 8px 12px;
-    font-size: 1rem;
-  }
-
-  .student-table1 {
-    font-size: 0.9rem;
-    overflow-x: auto;
-    display: block;
-  }
 }
 
-
-@media screen and (max-width: 479px) {
- .student-table1 th,
-  .student-table1 td {
-    padding: 16.8px;
-    font-size: 0.8rem;
-  }
-
-}
-
-@media screen and (max-width: 390px) {
- .student-table1 th,
-  .student-table1 td {
-    padding: 7.3px;
-    font-size: 0.8rem;
-  }
-
-}
-@media screen and (max-width: 460px) {
- .student-table1 th,
-  .student-table1 td {
-    padding: 15.8px;
-    font-size: 0.8rem;
-  }
-
-}
-
-@media screen and (max-width: 360px) {
-  .student-table1 th,
-  .student-table1 td {
-    padding: 6.5px;
-    font-size: 0.75rem;
-  }
-
-  .add-student-button1 {
-    font-size: 0.9rem;
-    padding: 0.7rem 0.9rem;
-  }
-
-  .class-filter-select1 {
-    font-size: 0.9rem;
-    padding: 6px;
-  }
-
-  .student-section1 {
-    padding: 15px;
-  }
-
-  .add-student-box1 {
-    padding: 15px;
-    width: 95%;
-  }
-
-  .submit-add-student-button1 {
-    padding: 6px 10px;
-    font-size: 0.9rem;
-  }
-
-  .close-add-student-button1 {
-    top: 15px;
-    right: 15px;
-    width: 45px;
-    height: 25px;
-    font-size: 13px;
-  }
-}
-@media screen and (max-width: 450px) {
-  .student-table1 th,
-  .student-table1 td {
-    padding: 12px;
-    font-size: 0.8rem;
-  }
-
+@media (max-width: 480px) {
   .db-connection-status1 {
     font-size: 1.2rem;
-    padding: 8px;
+    margin: 10px 0;
   }
 
   .add-student-button1 {
-    font-size: 1rem;
-    padding: 0.8rem 1rem;
-    width: 95%;
-  }
-
-  .student-section1 {
-    padding: 18px;
-    margin: 10px;
-  }
-
-  .student-list-heading1 {
-    font-size: 1.3rem;
-  }
-
-  .class-filter-select1 {
-    font-size: 1rem;
-    padding: 8px;
-    width: 100%;
-  }
-
-  .action-cell1 .delete-student-button1 {
-    padding: 6px 10px;
-    font-size: 0.8rem;
-  }
-
-  .add-student-box1 {
-    padding: 18px;
-    width: 94%;
-  }
-
-  .close-add-student-button1 {
-    top: 18px;
-    right: 18px;
-    width: 48px;
-    height: 26px;
-    font-size: 13px;
-  }
-
-  .add-student-title1 {
-    font-size: 1.2rem;
-  }
-
-  .student-input1,
-  .student-select1 {
-    padding: 10px;
-    font-size: 1rem;
-  }
-
-  .submit-add-student-button1 {
-    padding: 8px 12px;
-    font-size: 1rem;
-  }
-
-  .student-table1 {
+    padding: 0.6rem 1rem;
     font-size: 0.9rem;
-    overflow-x: auto;
-    display: block;
-  }
-}
-@media screen and (max-width: 387px) {
-  .student-table1 th,
-  .student-table1 td {
-    padding: 9.6px;
-    font-size: 0.75rem;
-  }
-
-  .db-connection-status1 {
-    font-size: 1.2rem;
-    padding: 8px;
-  }
-
-  .add-student-button1 {
-    font-size: 0.95rem;
-    padding: 0.7rem 0.9rem;
-    width: 95%;
   }
 
   .student-section1 {
     padding: 15px;
-    margin: 8px;
   }
 
   .student-list-heading1 {
@@ -453,47 +294,51 @@
   }
 
   .class-filter-select1 {
-    font-size: 0.9rem;
+    font-size: 1.2rem;
     padding: 6px;
-    width: 100%;
+  }
+
+  .no-students-message1 {
+    font-size: 0.9rem;
+  }
+
+  .student-table1 th,
+  .student-table1 td {
+    padding: 8px;
+    font-size: 0.8rem;
   }
 
   .action-cell1 .delete-student-button1 {
-    padding: 5px 9px;
-    font-size: 0.75rem;
+    padding: 5px 10px;
+    font-size: 0.7rem;
   }
 
   .add-student-box1 {
     padding: 15px;
-    width: 95%;
-  }
-
-  .close-add-student-button1 {
-    top: 15px;
-    right: 15px;
-    width: 45px;
-    height: 25px;
-    font-size: 13px;
+    max-width: 90%;
   }
 
   .add-student-title1 {
     font-size: 1.1rem;
+    margin-bottom: 10px;
   }
 
   .student-input1,
   .student-select1 {
-    padding: 9px;
-    font-size: 0.95rem;
+    padding: 10px;
+    font-size: 0.9rem;
   }
 
   .submit-add-student-button1 {
-    padding: 7px 10px;
-    font-size: 0.95rem;
+    padding: 6px 12px;
+    font-size: 0.9rem;
   }
 
-  .student-table1 {
-    font-size: 0.85rem;
-    overflow-x: auto;
-    display: block;
+  .close-add-student-button1 {
+    top: 15px;
+    right: 20px;
+    width: 40px;
+    height: 20px;
+    font-size: 12px;
   }
 }

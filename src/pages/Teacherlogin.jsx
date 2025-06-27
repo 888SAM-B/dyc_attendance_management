@@ -1,12 +1,28 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-
+import './Teacherlogin.css';
 const url = import.meta.env.VITE_URL;
+
+
 
 const TeacherLogin = () => {
   const navigate = useNavigate();
   const [institution, setInstitution] = useState('');
   const [dbName, setDbName] = useState('');
+
+    useEffect(() => {
+    document.body.style.background = 'linear-gradient(to right, #083f66, #0e204d)';
+    document.body.style.margin = '0';
+    document.body.style.padding = '0';
+    document.body.style.fontFamily = '"Roboto Condensed", sans-serif';
+
+    return () => {
+      document.body.style.background = '';
+      document.body.style.margin = '';
+      document.body.style.padding = '';
+      document.body.style.fontFamily = '';
+    };
+  }, []);
 
   useEffect(() => {
     const fetchInstitutions = async () => {
@@ -60,15 +76,39 @@ const TeacherLogin = () => {
 
   return (
     <>  
-    <form onSubmit={handleSubmit}>
-      <select id="institution" onChange={(e) => setInstitution(e.target.value)} required>
-        <option value="">Select Institution</option>
-      </select>
-      <input type="text" name="username" placeholder="Staff ID" required />
-      <input type="password" name="password" placeholder="Password" required />
-      <button type="submit">Login</button>
-    </form>
-    <h2>{dbName}</h2>
+    <form className="login-form" onSubmit={handleSubmit}>
+  <select
+    id="institution"
+    className="login-form-select"
+    onChange={(e) => setInstitution(e.target.value)}
+    required
+  >
+    <option value="">Select Institution</option>
+  </select>
+
+  <input
+    type="text"
+    name="username"
+    className="login-form-input login-form-username"
+    placeholder="Staff ID"
+    required
+  />
+
+  <input
+    type="password"
+    name="password"
+    className="login-form-input login-form-password"
+    placeholder="Password"
+    required
+  />
+
+  <button type="submit" className="login-form-button">
+    Login
+  </button>
+</form>
+
+<h2 className="login-form-dbname">{dbName}</h2>
+
     </>
   );
 };  

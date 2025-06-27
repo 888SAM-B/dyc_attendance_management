@@ -1,6 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import './listOfClasses1.css';
 const url = import.meta.env.VITE_URL;
+
+
+
 
 const listOfClasses1 = () => {
   const [display, setDisplay] = useState('none');
@@ -26,18 +30,46 @@ const listOfClasses1 = () => {
     fetchClasses();
   }, []);
 
+   useEffect(() => {
+  document.body.style.background = 'linear-gradient(to right, #083f66, #0e204d)';
+  document.body.style.margin = '0';
+  document.body.style.padding = '0';
+  document.body.style.fontFamily = '"Roboto Condensed", sans-serif';
+
+  return () => {
+    document.body.style.background = '';
+    document.body.style.margin = '';
+    document.body.style.padding = '';
+    document.body.style.fontFamily = '';
+  };
+}, []);
+ 
+
   return (
     <>
-      <h1>LIST OF CLASSES 1</h1>
-      <div className="classesList">
-        {classes.map((cls, idx) => (
-          <button
-          onClick={()=>{navigate('/markAttendance', { state: { students: cls.Students, className: cls.className } })}}
-          ><div className="Classes" key={cls._id || idx}>
-            <h2>{cls.className}</h2>
-          </div></button>
-        ))}
+      <h1 className="class-list-title2">LIST OF CLASSES 1</h1>
+
+<div className="class-list-container2">
+  {classes.map((cls, idx) => (
+    <button
+      key={cls._id || idx}
+      className="class-card-button2"
+      onClick={() => {
+        navigate('/markAttendance', {
+          state: {
+            students: cls.Students,
+            className: cls.className
+          }
+        });
+      }}
+    >
+      <div className="class-card2">
+        <h2 className="class-name-heading2">{cls.className}</h2>
       </div>
+    </button>
+  ))}
+</div>
+
     </>
   );
 };

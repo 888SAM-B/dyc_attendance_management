@@ -24,19 +24,44 @@ const listOfClasses2 = () => {
   useEffect(() => {
     fetchClasses();
   }, []);
+
+     useEffect(() => {
+    document.body.style.background = 'linear-gradient(to right, #083f66, #0e204d)';
+    document.body.style.margin = '0';
+    document.body.style.padding = '0';
+    document.body.style.fontFamily = '"Roboto Condensed", sans-serif';
+  
+    return () => {
+      document.body.style.background = '';
+      document.body.style.margin = '';
+      document.body.style.padding = '';
+      document.body.style.fontFamily = '';
+    };
+  }, []);
   return (
     <>
-    <h1>LIST OF CLASSES 2</h1>
-      <div className="classesList">
-        {classes.map((cls, idx) => (
-          <button
-          onClick={()=>{navigate('/attendanceReport', { state: { className: cls.className } })
-        }}
-          ><div className="Classes" key={cls._id || idx}>
-            <h2>{cls.className}</h2>
-          </div></button>
-        ))}
+    <h1 className="class-list-title2">LIST OF CLASSES 2</h1>
+
+<div className="class-list-container2">
+  {classes.map((cls, idx) => (
+    <button
+      key={cls._id || idx}
+      className="class-card-button2"
+      onClick={() => {
+        navigate('/attendanceReport', {
+          state: {
+            className: cls.className
+          }
+        });
+      }}
+    >
+      <div className="class-card2">
+        <h2 className="class-name-heading2">{cls.className}</h2>
       </div>
+    </button>
+  ))}
+</div>
+
     </>
   );
 };

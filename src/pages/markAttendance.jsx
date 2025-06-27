@@ -1,6 +1,7 @@
 import { useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import './markAttendance.css';
 
 const MarkAttendance = () => {
     const [students, setStudents] = useState([]);
@@ -8,6 +9,20 @@ const MarkAttendance = () => {
     const [attendance, setAttendance] = useState([]);
     const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().split("T")[0]);
 
+
+     useEffect(() => {
+      document.body.style.background = 'linear-gradient(to right, #083f66, #0e204d)';
+      document.body.style.margin = '0';
+      document.body.style.padding = '0';
+      document.body.style.fontFamily = '"Roboto Condensed", sans-serif';
+    
+      return () => {
+        document.body.style.background = '';
+        document.body.style.margin = '';
+        document.body.style.padding = '';
+        document.body.style.fontFamily = '';
+      };
+    }, []);
     const location = useLocation();
 
     useEffect(() => {
@@ -116,58 +131,65 @@ const MarkAttendance = () => {
     }
     return (
         <>            
-            <h1>{className} Attendance</h1>
+           <h1 className="attendance-title">{className} Attendance</h1>
 
-            <div style={{ margin: "10px 0" }}>
-                <label>Select Date: </label>
+<div className="attendance-date-selector">
+  <label htmlFor="datePicker">Select Date: </label>
+  <input
+    id="datePicker"
+    type="date"
+    value={selectedDate}
+    onChange={(e) => setSelectedDate(e.target.value)}
+    className="attendance-date-input"
+  />
+</div>
+
+{students.length === 0 ? (
+  <p className="attendance-no-students">No students found.</p>
+) : (
+  <>
+    <table className="attendance-table">
+      <thead>
+        <tr>
+          <th rowSpan={2}>Name</th>
+          <th rowSpan={2}>Roll No</th>
+          <th colSpan={2}>Hours</th>
+        </tr>
+        <tr>
+          <th>FORENOON</th>
+          <th>AFTERNOON</th>
+        </tr>
+      </thead>
+      <tbody>
+        {students.map((student, sIdx) => (
+          <tr key={student._id || sIdx}>
+            <td>{student.name}</td>
+            <td>{student.rollNumber}</td>
+            {attendance[sIdx]?.map((checked, hIdx) => (
+              <td key={hIdx}>
                 <input
-                    type="date"
-                    value={selectedDate}
-                    onChange={(e) => setSelectedDate(e.target.value)}
+                  type="checkbox"
+                  checked={checked}
+                  onChange={() => handleCheckboxChange(sIdx, hIdx)}
+                  className="attendance-checkbox"
                 />
-            </div>
+              </td>
+            ))}
+          </tr>
+        ))}
+      </tbody>
+    </table>
 
-            {students.length === 0 ? (
-                <p>No students found.</p>
-            ) : (
-                <>
-                    <table border={1} cellPadding={5} cellSpacing={0}>
-                        <thead>
-                            <tr >
-                                <th rowSpan={2}>Name</th>
-                                <th rowSpan={2}>Roll No</th>
-                                <th colSpan={2}>Hours</th>
-                            </tr>
-                            <tr >
-                                <th>FORENOON</th>
-                                <th>AFTERNOON</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {students.map((student, sIdx) => (
-                                <tr key={student._id || sIdx}>
-                                    <td>{student.name}</td>
-                                    <td>{student.rollNumber}</td>
-                                    {attendance[sIdx]?.map((checked, hIdx) => (
-                                        <td key={hIdx}>
-                                            <input
-                                                type="checkbox"
-                                                checked={checked}
-                                                onChange={() => handleCheckboxChange(sIdx, hIdx)}
-                                            />
-                                        </td>
-                                    ))}
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+    <div className="attendance-button-group">
+      <button onClick={handleSubmit} className="attendance-submit-button">
+        Submit Attendance
+      </button>
+      <button onClick={handleFinish} className="attendance-finish-button">
+        Finish Attendance for today
+      </button>
+    </div>
+ 
 
-                    <button onClick={handleSubmit} style={{ marginTop: '20px' }}>
-                        Submit Attendance
-                    </button>
-                    <button onClick={handleFinish} >
-                        Finish Attendance for today
-                    </button>
                 </>
             )}
         </>

@@ -1,9 +1,11 @@
 import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './createinstitution.css';
 
 const url = import.meta.env.VITE_URL;
 
 const CreateInstitution = () => {
+  const navigate = useNavigate();
   useEffect(() => {
     
     document.body.style.background = 'linear-gradient(to right, #083f66, #0e204d)';
@@ -43,6 +45,9 @@ const CreateInstitution = () => {
       .then((data) => {
         console.log('Institution created:', data);
         alert(data.message || data.error || 'Institution created successfully');
+        if (data.message) {
+          navigate('/adminlogin', { replace: true });
+        }
       })
       .catch((error) => {
         console.error('Error:', error);

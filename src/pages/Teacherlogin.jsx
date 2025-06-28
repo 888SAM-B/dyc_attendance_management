@@ -54,7 +54,7 @@ const TeacherLogin = () => {
       const response = await fetch(`${url}/staffLogin`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ institution, username, password })
+        body: JSON.stringify({ institution, username: username.replace(/\s+/g, ''), password: password.replace(/\s+/g, '') })
       });
       console.log('Response:', response);
       if (response.ok) {

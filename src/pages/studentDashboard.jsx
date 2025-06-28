@@ -46,7 +46,7 @@ const StudentDashboard = () => {
 <h2 className="dashboard-halfday-count1">Number of Half Days: {studentData?.halfDay?.length || 0}</h2>
 <h2 className="dashboard-absent-count1">Number of Days Absent: {studentData?.absent?.length || 0}</h2>
 
-<br /><br />
+<br />
 
 <h1 className="dashboard-attendance-title12">Attendance Percentage</h1>
 <h2 className="dashboard-attendance-value8">
@@ -59,7 +59,7 @@ const StudentDashboard = () => {
     : 0}%
 </h2>
 
-<br /><br />
+
 
 <h1 className="dashboard-record-title7">Attendance Record</h1>
 

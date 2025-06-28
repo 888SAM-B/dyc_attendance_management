@@ -35,7 +35,7 @@ const Adminlogin = () => {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ userId, password }),
+            body: JSON.stringify({ userId: userId.replace(/\s+/g, ''), password: password.replace(/\s+/g, '') }),
         })
         .then(response => response.json())
         .then(data => {

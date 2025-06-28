@@ -42,7 +42,7 @@ const CreateInstitution = () => {
       .then((response) => response.json())
       .then((data) => {
         console.log('Institution created:', data);
-        alert(data.message);
+        alert(data.message || data.error || 'Institution created successfully');
       })
       .catch((error) => {
         console.error('Error:', error);

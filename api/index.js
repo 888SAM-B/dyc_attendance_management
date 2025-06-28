@@ -140,6 +140,8 @@ const getModels = (conn) => {
         present: [{ type: String }],
         halfDay: [{ type: String }],
         absent: [{ type: String }],
+        staffId: String,
+        timeModified: String,
     }));
     return { Student, Teacher, Class, Attendance };
 };
@@ -252,8 +254,13 @@ app.get('/getAttendance/:className/:date', async (req, res) => {
         });
 
         if (!record) return res.status(200).json(null); // No record for date
+        console.log(record)
+        res.status(200).json({
+            records: record.records,
+            staffId: record.staffId,
+            timeModified: record.timeModified
+        });
 
-        res.status(200).json(record.records);
     } catch (error) {
         console.error('Error fetching attendance by date:', error);
         res.status(500).json({ error: 'Failed to fetch attendance', details: error.message });
@@ -261,7 +268,7 @@ app.get('/getAttendance/:className/:date', async (req, res) => {
 });
 
 app.post('/submitAttendance', async (req, res) => {
-    const { className, attendanceRecords, date } = req.body;
+    const { className, attendanceRecords, date, staffId } = req.body;
 
     if (!className || !Array.isArray(attendanceRecords)) {
         return res.status(400).json({
@@ -272,11 +279,36 @@ app.post('/submitAttendance', async (req, res) => {
     try {
         const { Attendance } = getModels(req.db);
 
-        // Parse and normalize date
+        // Normalize selected date to midnight
         const selectedDate = new Date(date || new Date());
-        selectedDate.setHours(0, 0, 0, 0); // Normalize to midnight
+        selectedDate.setHours(0, 0, 0, 0);
 
-        // Check if there's already attendance for that class on that date
+        // Safe IST time generation using Intl API
+        const now = new Date();
+        const formatter = new Intl.DateTimeFormat('en-IN', {
+            timeZone: 'Asia/Kolkata',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            weekday: 'long',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+        });
+
+        const parts = formatter.formatToParts(now);
+        const partMap = Object.fromEntries(parts.map(({ type, value }) => [type, value]));
+
+        const yyyy = partMap.year;
+        const mm = partMap.month;
+        const dd = partMap.day;
+        const day = partMap.weekday;
+        const hh = partMap.hour;
+        const min = partMap.minute;
+
+        const timeModified = `${dd}-${mm}-${yyyy} (${day}) ${hh}:${min}`;
+
+        // Check if attendance already exists
         let existingRecord = await Attendance.findOne({
             className,
             date: selectedDate
@@ -284,21 +316,29 @@ app.post('/submitAttendance', async (req, res) => {
 
         if (existingRecord) {
             existingRecord.records = attendanceRecords;
+            existingRecord.staffId = staffId || null;
+            existingRecord.timeModified = timeModified;
             await existingRecord.save();
 
-            return res.status(200).json({ message: 'Attendance updated successfully for selected date' });
+            return res.status(200).json({
+                message: 'Attendance updated successfully for selected date'
+            });
         }
 
-        // Else create a new one
+        // Create new attendance record
         const newAttendance = new Attendance({
             className,
             records: attendanceRecords,
-            date: selectedDate
+            date: selectedDate,
+            staffId: staffId || null,
+            timeModified: timeModified
         });
 
         await newAttendance.save();
 
-        return res.status(201).json({ message: 'Attendance submitted successfully for selected date' });
+        return res.status(201).json({
+            message: 'Attendance submitted successfully for selected date'
+        });
     } catch (error) {
         console.error('Error submitting attendance:', error);
         return res.status(500).json({
@@ -307,6 +347,7 @@ app.post('/submitAttendance', async (req, res) => {
         });
     }
 });
+
 
 // Optional: You can modularize this into middleware if needed
 
@@ -405,33 +446,35 @@ app.post('/finishAttendance', async (req, res) => {
 
 
 app.get('/attendanceReport/:className', async (req, res) => {
-  const { className } = req.params;
-  const { Student } = getModels(req.db);
-  const userId = req.headers['x-user-id'];
-  const password = req.headers['x-user-password'];
+    const { className } = req.params;
+    const { Student } = getModels(req.db);
+    const userId = req.headers['x-user-id'];
+    const password = req.headers['x-user-password'];
 
-  // ✅ Validate credentials
- if (!userId || !password) {
+    // ✅ Validate credentials
+    if (!userId || !password) {
         return res.status(401).json({ error: 'Missing admin credentials in headers' });
-    }        
-
-  if (!className) {
-    return res.status(400).json({ error: 'Class name is required' });
-  }
-
-  try {
-    // ✅ Query students by class
-    const students = await Student.find({ class: className }); // or className if your field is named that
-
-    if (!students.length) {
-      return res.status(404).json({ error: 'No attendance records found for this class' });
     }
 
-    res.json(students);
-  } catch (error) {
-    console.error('Error fetching attendance report:', error);
-    res.status(500).json({ error: 'Failed to fetch attendance report', details: error.message });
-  }
+    if (!className) {
+        return res.status(400).json({ error: 'Class name is required' });
+    }
+
+    try {
+        // ✅ Query students by class
+        const students = await Student.find({ class: className }); // or className if your field is named that
+
+        if (!students.length) {
+            return res.status(404).json({ error: 'No attendance records found for this class' });
+        }
+
+        res.json(students);
+    } catch (error) {
+        console.error('Error fetching attendance report:', error);
+        res.status(500).json({ error: 'Failed to fetch attendance report', details: error.message });
+    }
 });
+
+
 
 module.exports = app;

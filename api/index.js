@@ -40,8 +40,10 @@ app.post('/createdb', async (req, res) => {
         return res.status(400).json({ error: 'All fields are required' });
     }
     try {
-        const exists = await Institution.findOne({ $or: [{ dbName }, { userId }] });
-        if (exists) return res.status(400).json({ error: 'DB or User already exists' });
+        const exists = await Institution.findOne({ userId });
+        if (exists) return res.status(400).json({ error: 'UserId already exists' });
+        const dbExists = await Institution.findOne({ dbName: dbName.replace(/\s+/g, '').toLowerCase() });
+        if (dbExists) return res.status(400).json({ error: 'Institution name already exists' });
 
         const conn = await getDbConnection(dbName.replace(/\s+/g, '').toLowerCase());
 
@@ -431,6 +433,5 @@ app.get('/attendanceReport/:className', async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch attendance report', details: error.message });
   }
 });
-
 
 module.exports = app;

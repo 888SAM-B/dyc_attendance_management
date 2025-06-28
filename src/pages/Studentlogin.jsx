@@ -1,6 +1,7 @@
 import React from 'react'
 import { useEffect,useState } from 'react'
 import { replace, useNavigate } from 'react-router-dom'
+import './Studentlogin.css';
 const Studentlogin = () => {
 const url = import.meta.env.VITE_URL
   const [institution, setInstitution] = useState('')
@@ -25,6 +26,21 @@ const url = import.meta.env.VITE_URL
         }
       };
       fetchInstitutions();
+    }, []);
+
+    
+     useEffect(() => {
+      document.body.style.background = 'linear-gradient(to right, #083f66, #0e204d)';
+      document.body.style.margin = '0';
+      document.body.style.padding = '0';
+      document.body.style.fontFamily = '"Roboto Condensed", sans-serif';
+    
+      return () => {
+        document.body.style.background = '';
+        document.body.style.margin = '';
+        document.body.style.padding = '';
+        document.body.style.fontFamily = '';
+      };
     }, []);
   const navigate = useNavigate()
   const handleSubmit = (e) => {
@@ -57,18 +73,18 @@ const url = import.meta.env.VITE_URL
   }
   return (
     <>
-        <div className='container'>
-            <h1>Student Login</h1>
+        <div className='container4'>
+            <h1 className='h13'>Student Login</h1>
             <form  onSubmit={handleSubmit}>
-               <select id="institution" onChange={(e) => setInstitution(e.target.value)} required>
-        <option value="">Select Institution</option>
+               <select className='se3' id="institution" onChange={(e) => setInstitution(e.target.value)} required>
+        <option className='e4' value="">Select Institution</option>
       </select>
-                <div className="mb-3">
-                    <label htmlFor="rollNumber" className="form-label">Roll Number</label>
-                    <input type="text" className="form-control" id="rollNumber" name="rollNumber" required />
+                <div className="mb-34">
+                    <label htmlFor="rollNumber" className="form-label9">Roll Number</label>
+                    <input type="text" className="form-control8" id="rollNumber" name="rollNumber" required />
                 </div>
                 
-            <button type="submit" className="btn btn-primary" >Login</button>
+            <button type="submit" className="btn btn-primary8" >Login</button>
             </form>
         </div>
     </>

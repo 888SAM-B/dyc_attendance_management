@@ -35,9 +35,10 @@ const StudentDashboard = () => {
       <h1 className="dashboard-title1">Student Dashboard</h1>
 <hr className="dashboard-divider1" />
 
-<h1 className="dashboard-welcome1">Welcome {studentData?.name || 'N/A'}!</h1>
+<h1 className="dashboard-welcome1">Welcome {studentData?.name || 'N/A'}</h1>
 <h1 className="dashboard-roll1">Roll No: {studentData?.rollNumber || 'N/A'}</h1>
 <h1 className="dashboard-class1">Class: {studentData?.class || 'N/A'}</h1>
+<hr className='dashboard-divider2' />
 <h1 className="dashboard-working-days1">
   Total Working Days: {studentData?.present?.length + studentData?.halfDay?.length + studentData?.absent?.length || 0}
 </h1>

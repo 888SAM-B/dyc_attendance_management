@@ -8,7 +8,8 @@ const MarkAttendance = () => {
     const [className, setClassName] = useState("");
     const [attendance, setAttendance] = useState([]);
     const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().split("T")[0]);
-
+    const [staffId, setStaffId] = useState("");
+    const [timeModified, setTimeModified] = useState("");
 
      useEffect(() => {
       document.body.style.background = 'linear-gradient(to right, #083f66, #0e204d)';
@@ -43,10 +44,12 @@ const MarkAttendance = () => {
                         'x-user-password': sessionStorage.getItem('adminPassword'),
                     }
                 });
-
+                console.log(response.data.staffId);
+                setStaffId(response.data.staffId || "Unknown");
+                setTimeModified(response.data.timeModified || " ");
                 if (response.data) {
                     const studentAttendance = students.map(student => {
-                        const record = response.data.find(r => r.studentId === student._id);
+                        const record = response.data.records.find(r => r.studentId === student._id);
                         return record ? record.attendance : Array(2).fill(false);
                     });
                     setAttendance(studentAttendance);
@@ -72,6 +75,7 @@ const MarkAttendance = () => {
     const handleSubmit = async () => {
         const userId = sessionStorage.getItem('adminUserId');
         const password = sessionStorage.getItem('adminPassword');
+        const staffId = sessionStorage.getItem('staffUserId');
 
         if (!userId || !password) {
             alert('Please login again.');
@@ -89,7 +93,8 @@ const MarkAttendance = () => {
             const response = await axios.post(`${import.meta.env.VITE_URL}/submitAttendance`, {
                 className,
                 attendanceRecords: attendanceData,
-                date: selectedDate
+                date: selectedDate,
+                staffId: staffId,
             }, {
                 headers: {
                     'x-user-id': userId,
@@ -98,6 +103,7 @@ const MarkAttendance = () => {
             });
 
             alert('Attendance submitted successfully!');
+            window.location.reload(); // Reload to fetch updated attendance
         } catch (error) {
             console.error('Error submitting attendance:', error);
             alert('Failed to submit attendance.');
@@ -131,7 +137,7 @@ const MarkAttendance = () => {
     }
     return (
         <>            
-           <h1 className="attendance-title">{className} Attendance</h1>
+           <h1 className="attendance-title">{className} Attendance </h1>
 
 <div className="attendance-date-selector">
   <label htmlFor="datePicker">Select Date: </label>
@@ -188,7 +194,9 @@ const MarkAttendance = () => {
         Finish Attendance for today
       </button>
     </div>
- 
+    <br />
+        <h3 style={{ textAlign: 'center', color: 'gray' }} >Last Modified by : {staffId} at {timeModified}</h3>
+
 
                 </>
             )}

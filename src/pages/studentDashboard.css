@@ -17,6 +17,12 @@
   margin: 0 auto 30px auto;
   border-radius: 10px;
 }
+.dashboard-divider2 {
+  border: 1.5px solid #f0d01d;
+  width: 50%;
+  margin: 0 auto 30px auto;
+  border-radius: 10px;
+}
 
 .dashboard-welcome1,
 .dashboard-roll1,
@@ -139,4 +145,8 @@
     padding: 10px;
     margin: 10px 15px;
   }
+}
+.dashboard-welcome1{
+  font-size:2rem;
+  ;
 }

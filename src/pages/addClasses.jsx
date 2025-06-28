@@ -114,17 +114,23 @@ const AddClasses = () => {
   </button>
 
   <div className="class-list-container">
-    {classes.map((cls, idx) => (
-      <div className="class-card" key={cls._id || idx}>
-        <h2 className="class-name">{cls.className}</h2>
-        <button
-          className="delete-class-button"
-          onClick={() => handleDeleteClass(cls._id, cls.className)}
-        >
-          X
-        </button>
-      </div>
-    ))}
+   {classes.length === 0 ? (
+  <p className="no-classes-text" style={{ color: 'gray' }}>No classes available</p>
+) : (
+  classes.map((cls, idx) => (
+    <div className="class-card" key={cls._id || idx}>
+      <h2 className="class-name">{cls.className}</h2>
+      <button
+        title="Delete Class"
+        className="delete-class-button"
+        onClick={() => handleDeleteClass(cls._id, cls.className)}
+      >
+        X
+      </button>
+    </div>
+  ))
+)}
+
   </div>
 
   <div className="add-class-modal-overlay">

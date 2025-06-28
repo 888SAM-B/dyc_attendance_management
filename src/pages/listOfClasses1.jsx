@@ -47,7 +47,7 @@ const listOfClasses1 = () => {
 
   return (
     <>
-      <h1 className="class-list-title2">LIST OF CLASSES 1</h1>
+      <h1 className="class-list-title2">LIST OF CLASSES</h1>
 
 <div className="class-list-container2">
   {classes.map((cls, idx) => (

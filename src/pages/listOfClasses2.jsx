@@ -1,11 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+
+// Replace with your .env URL
 const url = import.meta.env.VITE_URL;
-const listOfClasses2 = () => {
-  const [display, setDisplay] = useState('none');
+
+const ListOfClasses2 = () => {
   const [classes, setClasses] = useState([]);
-  const inputRef = useRef(null);
-  const  navigate=useNavigate();
+  const navigate = useNavigate();
+
+  // Fetch class list from backend
   const fetchClasses = async () => {
     try {
       const response = await fetch(`${url}/classes`, {
@@ -15,22 +18,27 @@ const listOfClasses2 = () => {
           'x-user-password': sessionStorage.getItem('adminPassword'),
         },
       });
+
+      if (!response.ok) throw new Error('Failed to fetch class list');
+
       const data = await response.json();
       setClasses(data);
     } catch (err) {
       console.error('Error fetching classes:', err);
     }
   };
+
   useEffect(() => {
     fetchClasses();
   }, []);
 
-     useEffect(() => {
+  // Apply full-page background style
+  useEffect(() => {
     document.body.style.background = 'linear-gradient(to right, #083f66, #0e204d)';
     document.body.style.margin = '0';
     document.body.style.padding = '0';
     document.body.style.fontFamily = '"Roboto Condensed", sans-serif';
-  
+
     return () => {
       document.body.style.background = '';
       document.body.style.margin = '';
@@ -38,32 +46,34 @@ const listOfClasses2 = () => {
       document.body.style.fontFamily = '';
     };
   }, []);
+
   return (
     <>
-    <h1 className="class-list-title2">LIST OF CLASSES 2</h1>
+      <h1 className="class-list-title2">LIST OF CLASSES</h1>
 
-<div className="class-list-container2">
-  {classes.map((cls, idx) => (
-    <button
-      key={cls._id || idx}
-      className="class-card-button2"
-      onClick={() => {
-        navigate('/attendanceReport', {
-          state: {
-            className: cls.className
-          }
-        });
-      }}
-    >
-      <div className="class-card2">
-        <h2 className="class-name-heading2">{cls.className}</h2>
+      <div className="class-list-container2">
+        {classes.length === 0 ? (
+          <p className="no-classes-text">No classes available</p>
+        ) : (
+          classes.map((cls, idx) => (
+            <button
+              key={cls._id || idx}
+              className="class-card-button2"
+              onClick={() =>
+                navigate('/attendanceReport', {
+                  state: { className: cls.className }
+                })
+              }
+            >
+              <div className="class-card2">
+                <h2 className="class-name-heading2">{cls.className}</h2>
+              </div>
+            </button>
+          ))
+        )}
       </div>
-    </button>
-  ))}
-</div>
-
     </>
   );
 };
 
-export default listOfClasses2;
+export default ListOfClasses2;

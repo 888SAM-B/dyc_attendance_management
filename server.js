@@ -15,6 +15,7 @@ mongoose.connect(centralDbUri, { useNewUrlParser: true, useUnifiedTopology: true
 
 const InstitutionSchema = new mongoose.Schema({
     dbName: String,
+    institutionName: String,
     userId: String,
     password: String,
     Teachers: Array,
@@ -42,7 +43,7 @@ app.post('/createdb', async (req, res) => {
         const exists = await Institution.findOne({ $or: [{ dbName }, { userId }] });
         if (exists) return res.status(400).json({ error: 'DB or User already exists' });
 
-        const conn = await getDbConnection(dbName);
+        const conn = await getDbConnection(dbName.replace(/\s+/g, '').toLowerCase());
 
         const TeacherSchema = new mongoose.Schema({ name: String, staffId: String, password: String, subject: String });
         const StudentSchema = new mongoose.Schema({ name: String, class: String, rollNumber: String });
@@ -53,7 +54,7 @@ app.post('/createdb', async (req, res) => {
         await new Teacher({ name: 'John Doe', staffId: 'T001', password: 'pass', subject: 'Math' }).save();
         await new Student({ name: 'Jane Smith', class: '10A', rollNumber: 'S001' }).save();
 
-        await new Institution({ dbName, userId, password }).save();
+        await new Institution({ dbName: dbName.replace(/\s+/g, '').toLowerCase(), institutionName: dbName, userId, password }).save();
         res.status(201).json({ message: `Database "${dbName}" created` });
     } catch (err) {
         res.status(500).json({ error: 'Failed to create DB', details: err.message });
@@ -109,6 +110,7 @@ const dbMiddleware = async (req, res, next) => {
     try {
         const conn = await getDbConnection(institution.dbName);
         req.db = conn;
+        req.institution = institution.institutionName;
         req.dbName = institution.dbName;
         next();
     } catch (err) {
@@ -145,7 +147,8 @@ app.get('/currentDb', async (req, res) => {
         const { Student, Teacher } = getModels(req.db);
         const students = await Student.find({});
         const teachers = await Teacher.find({});
-        res.json({ dbName: req.dbName, students, staff: teachers });
+        console.log(`Current DB: ${req.institution} (${req.dbName})`);
+        res.json({ dbName: req.institution, students, staff: teachers });
     } catch (err) {
         res.status(500).json({ error: 'Fetch failed', details: err.message });
     }

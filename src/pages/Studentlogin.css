@@ -78,7 +78,7 @@
 
 @media (max-width: 480px) {
   .container4 {
-    padding: 25px;
+    padding: 25px;  
      margin: 20px;
   }
 
@@ -89,7 +89,7 @@
   .form-control8,
   .se3 {
     padding: 12px;
-    font-size: 1rem;
+    font-size: 1rem; 
   }
 
   .btn-primary8 {

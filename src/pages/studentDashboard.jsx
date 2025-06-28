@@ -5,16 +5,8 @@ const StudentDashboard = () => {
   const [studentData, setStudentData] = useState({});
   const location = useLocation();
 
-  useEffect(() => {
-    const studentData = location.state?.studentData;
-    if (!studentData) {
-      console.error('No student data found in location state');
-      return;
-    }
-    console.log('Student Data:', studentData);
-    setStudentData(studentData);
-  }, [location]);
-   useEffect(() => {
+
+    useEffect(() => {
       document.body.style.background = 'linear-gradient(to right, #083f66, #0e204d)';
       document.body.style.margin = '0';
       document.body.style.padding = '0';
@@ -27,6 +19,16 @@ const StudentDashboard = () => {
         document.body.style.fontFamily = '';
       };
     }, []);
+  useEffect(() => {
+    const studentData = location.state?.studentData;
+    if (!studentData) {
+      console.error('No student data found in location state');
+      return;
+    }
+    console.log('Student Data:', studentData);
+    setStudentData(studentData);
+  }, [location]);
+ 
 
   return (
     <>

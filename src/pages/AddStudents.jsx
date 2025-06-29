@@ -86,8 +86,9 @@ const AddStudents = () => {
     fetchClasses();
   }, []);
 
-  const handleDelete = async (studentId) => {
+  const handleDelete = async (studentId, rollNumber, className) => {
     //confirm box
+    
     const a=window.confirm("Are you sure you want to delete this Student?")
     if(!a){
       return
@@ -100,7 +101,8 @@ const AddStudents = () => {
           'x-user-id': sessionStorage.getItem('adminUserId'),
           'x-user-password': sessionStorage.getItem('adminPassword')
         },
-        body: JSON.stringify({ studentId }),
+        body: JSON.stringify({ studentId, rollNumber, className })
+         // Debugging line
       });
 
       const data = await response.json();
@@ -108,9 +110,10 @@ const AddStudents = () => {
         alert(data.error);
       } else {
         alert(data.message);
-        setStudents(students.filter((student) => student._id !== studentId));
-        setAllStudents(allStudents.filter((student) => student._id !== studentId)); // Update allStudents as well
+        setStudents(students.filter((student) => student.rollNumber !== rollNumber));
+        setAllStudents(allStudents.filter((student) => student.rollNumber !== rollNumber)); // Update allStudents as well
       }
+      console.log('Deleting student:', { studentId, rollNumber, className });
     } catch (err) {
       console.error('Error:', err);
       alert('Failed to delete student');
@@ -135,8 +138,8 @@ const sortByClass = (e) => {
   {error
     ? error
     : loading
-    ? 'Connecting to database...'
-    : `Connected to: ${dbName}`}
+    ? 'Loading...'
+    : `${dbName}`}
 </h1>
 
 
@@ -174,7 +177,7 @@ const sortByClass = (e) => {
               <td>{student.class}</td>
               <td>{student.rollNumber}</td>
               <td className="action-cell">
-                <button onClick={() => handleDelete(student._id)} className="delete-student-button">
+                <button onClick={() => handleDelete(student._id,student.rollNumber,student.class)} className="delete-student-button">
                   Delete
                 </button>
               </td>

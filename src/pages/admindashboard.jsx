@@ -60,7 +60,7 @@ const AdminDashboard = () => {
     return (
         <div className="admin-dashboard-container">
             <h1 className="db-status-heading">
-                {dbName ? `Connected to: ${dbName}` : 'Loading DB...'}
+                {dbName ? `Connected to: ${dbName}` : 'Connectiong to Data Base...'}
             </h1>
             <h2 className="admin-dashboard-title">Admin Dashboard</h2>
             <p className="admin-welcome-text">Welcome to the admin dashboard!</p>

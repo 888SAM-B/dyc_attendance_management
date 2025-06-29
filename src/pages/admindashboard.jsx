@@ -8,7 +8,7 @@ const AdminDashboard = () => {
     const [dbName, setDbName] = useState('');
 
     useEffect(() => {
-        
+
         document.body.style.background = 'linear-gradient(to right, #083f66, #0e204d)';
         document.body.style.margin = '0';
         document.body.style.padding = '0';
@@ -60,7 +60,7 @@ const AdminDashboard = () => {
     return (
         <div className="admin-dashboard-container">
             <h1 className="db-status-heading">
-                {dbName ? `Connected to: ${dbName}` : 'Connectiong to Data Base...'}
+                {dbName ? `Connected to: ${dbName}` : 'Connecting to DataBase...'}
             </h1>
             <h2 className="admin-dashboard-title">Admin Dashboard</h2>
             <p className="admin-welcome-text">Welcome to the admin dashboard!</p>
@@ -87,6 +87,13 @@ const AdminDashboard = () => {
                     onClick={() => navigate('/addClasses')}
                 >
                     Class
+                </button>
+                <button
+                    className="admin-btn admin-classes-btn"
+                    title="Add or Remove Classes"
+                    onClick={() => navigate('/class_list')}
+                >
+                    View Attendance
                 </button>
             </div>
         </div>

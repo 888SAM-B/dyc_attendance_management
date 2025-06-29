@@ -6,11 +6,13 @@ const url = import.meta.env.VITE_URL;
 
 const ListOfClasses2 = () => {
   const [classes, setClasses] = useState([]);
+  const [loading, setLoading] = useState(true); // 👈 Loading state
   const navigate = useNavigate();
 
   // Fetch class list from backend
   const fetchClasses = async () => {
     try {
+      setLoading(true); // Start loading
       const response = await fetch(`${url}/classes`, {
         headers: {
           'Content-Type': 'application/json',
@@ -25,6 +27,8 @@ const ListOfClasses2 = () => {
       setClasses(data);
     } catch (err) {
       console.error('Error fetching classes:', err);
+    } finally {
+      setLoading(false); // End loading
     }
   };
 
@@ -52,7 +56,9 @@ const ListOfClasses2 = () => {
       <h1 className="class-list-title2">LIST OF CLASSES</h1>
 
       <div className="class-list-container2">
-        {classes.length === 0 ? (
+        {loading ? (
+          <p className="loading-text">Loading classes...</p> 
+        ) : classes.length === 0 ? (
           <p className="no-classes-text">No classes available</p>
         ) : (
           classes.map((cls, idx) => (

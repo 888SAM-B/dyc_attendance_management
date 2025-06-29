@@ -173,10 +173,19 @@ app.post('/addStudent', async (req, res) => {
 });
 
 app.post('/deleteStudent', async (req, res) => {
-    const { studentId } = req.body;
+    const { studentId, rollNumber, className } = req.body;
     const { Student } = getModels(req.db);
-    const result = await Student.deleteOne({ _id: studentId });
+    const result = await Student.deleteOne({ rollNumber });
+    
     if (result.deletedCount === 0) return res.status(404).json({ error: 'Student not found' });
+    const { Class } = getModels(req.db);
+    const classExists = await Class.findOne({ className });
+    
+    if (!classExists) return res.status(400).json({ error: 'Class does not exist' });
+    classExists.Students = classExists.Students.filter(student => student.rollNumber !== rollNumber);
+    await classExists.save();
+    
+    
     res.json({ message: 'Student deleted' });
 });
 
@@ -184,7 +193,7 @@ app.post('/addStaff', async (req, res) => {
     const { name, staffId, password, subject } = req.body;
     const { Teacher } = getModels(req.db);
     const exists = await Teacher.findOne({ staffId });
-    if (exists) return res.status(400).json({ error: 'Staff exists' });
+    if (exists) return res.status(400).json({ error: 'Staff Id already exists' });
     await mongoose.model('Institution').updateOne(
         { dbName: req.dbName },
         { $push: { Teachers: { name, staffId, password, subject } } }
@@ -474,6 +483,7 @@ app.get('/attendanceReport/:className', async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch attendance report', details: error.message });
     }
 });
+
 
 
 app.listen(5000, () => console.log('Server running on port 5000'));

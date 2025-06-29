@@ -90,7 +90,7 @@ app.post('/studentLogin', async (req, res) => {
     const Student = conn.models.Student || conn.model('Student', new mongoose.Schema({ name: String, class: String, rollNumber: String }));
     const student = await Student.findOne({ rollNumber });
     if (!student) return res.status(404).json({ error: 'Student not found' });
-    console.log(student);
+    
     res.json({ message: 'Login successful', studentData: student });
 });
 
@@ -263,7 +263,7 @@ app.get('/getAttendance/:className/:date', async (req, res) => {
         });
 
         if (!record) return res.status(200).json(null); // No record for date
-        console.log(record)
+        
         res.status(200).json({
             records: record.records,
             staffId: record.staffId,

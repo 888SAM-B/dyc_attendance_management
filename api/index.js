@@ -151,7 +151,7 @@ app.get('/currentDb', async (req, res) => {
         const { Student, Teacher } = getModels(req.db);
         const students = await Student.find({});
         const teachers = await Teacher.find({});
-        console.log(`Current DB: ${req.institution} (${req.dbName})`);
+        
         res.json({ dbName: req.institution, students, staff: teachers });
     } catch (err) {
         res.status(500).json({ error: 'Fetch failed', details: err.message });
@@ -405,7 +405,7 @@ app.post('/finishAttendance', async (req, res) => {
             const totalPeriods = student.attendance.length;
             const presentCount = student.attendance.filter(val => val).length;
             const studentDoc = await Student.findOne({ rollNumber: student.rollNumber });
-            console.log(`Processing student: ${studentDoc.name} (${student.rollNumber})`);
+            
             studentDoc.present = studentDoc.present.filter(dates => dates !== date);
             studentDoc.halfDay = studentDoc.halfDay.filter(dates => dates !== date);
             studentDoc.absent = studentDoc.absent.filter(dates => dates !== date);

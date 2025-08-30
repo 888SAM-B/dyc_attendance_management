@@ -33,6 +33,9 @@ const getDbConnection = async (dbName) => {
     connectionCache[dbName] = conn;
     return conn;
 };
+app.get('/', (req, res) => {
+    res.send('Hello from Express server!');
+});
 
 app.post('/createdb', async (req, res) => {
     const { dbName, userId, password } = req.body;
@@ -487,3 +490,4 @@ app.get('/attendanceReport/:className', async (req, res) => {
 
 
 app.listen(5000, () => console.log('Server running on port 5000'));
+
